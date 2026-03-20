@@ -7,6 +7,10 @@
   },
   "servers": [
     {
+      "url": "https://calambiyahe-api.incygnia.dev",
+      "description": "Production server"
+    },
+    {
       "url": "http://localhost:3000",
       "description": "Local development server"
     }
@@ -46,9 +50,7 @@
   "paths": {
     "/health": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Health check",
         "responses": {
           "200": {
@@ -66,9 +68,7 @@
     },
     "/api/v1/auth/register": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Register a new user",
         "requestBody": {
           "required": true,
@@ -99,9 +99,7 @@
     },
     "/api/v1/auth/login": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Login user",
         "requestBody": {
           "required": true,
@@ -140,9 +138,7 @@
     },
     "/api/v1/routes": {
       "get": {
-        "tags": [
-          "Routes Public"
-        ],
+        "tags": ["Routes Public"],
         "summary": "List routes (active by default)",
         "parameters": [
           {
@@ -151,10 +147,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
+              "enum": ["true", "false"]
             },
             "description": "Set to true to include inactive routes"
           }
@@ -175,9 +168,7 @@
     },
     "/api/v1/routes/{id}": {
       "get": {
-        "tags": [
-          "Routes Public"
-        ],
+        "tags": ["Routes Public"],
         "summary": "Get route details",
         "parameters": [
           {
@@ -203,9 +194,7 @@
     },
     "/api/v1/admin/routes": {
       "get": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin list routes",
         "security": [
           {
@@ -222,10 +211,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ]
+              "enum": ["true", "false"]
             }
           }
         ],
@@ -252,9 +238,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin create route",
         "security": [
           {
@@ -302,9 +286,7 @@
     },
     "/api/v1/admin/routes/{id}": {
       "get": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin get route details",
         "security": [
           {
@@ -345,9 +327,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin update route",
         "security": [
           {
@@ -398,9 +378,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin delete route",
         "security": [
           {
@@ -443,9 +421,7 @@
     },
     "/api/v1/admin/routes/{id}/waypoints": {
       "post": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin add waypoint",
         "security": [
           {
@@ -499,9 +475,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin replace all waypoints",
         "security": [
           {
@@ -560,9 +534,7 @@
     },
     "/api/v1/admin/routes/{id}/waypoints/{wid}": {
       "delete": {
-        "tags": [
-          "Routes Admin"
-        ],
+        "tags": ["Routes Admin"],
         "summary": "Admin delete waypoint",
         "security": [
           {
@@ -611,9 +583,7 @@
     },
     "/api/v1/gps/broadcast": {
       "post": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Broadcast GPS signal",
         "security": [
           {
@@ -661,9 +631,7 @@
     },
     "/api/v1/gps/signals/{route_id}": {
       "get": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Get active signals by route",
         "security": [
           {
@@ -700,9 +668,7 @@
     },
     "/api/v1/gps/signal/{signal_id}": {
       "delete": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Delete signal manually",
         "security": [
           {
@@ -739,9 +705,7 @@
     },
     "/api/v1/gps/driver/start-route": {
       "post": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Driver start active route session",
         "security": [
           {
@@ -789,9 +753,7 @@
     },
     "/api/v1/gps/driver/end-route": {
       "post": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Driver end active route session",
         "security": [
           {
@@ -826,9 +788,7 @@
     },
     "/api/v1/gps/driver/active-route": {
       "get": {
-        "tags": [
-          "GPS"
-        ],
+        "tags": ["GPS"],
         "summary": "Driver get active route session",
         "security": [
           {
@@ -863,9 +823,7 @@
     },
     "/api/v1/heatmap/{route_id}": {
       "get": {
-        "tags": [
-          "Heatmap"
-        ],
+        "tags": ["Heatmap"],
         "summary": "Get route-scoped heatmap",
         "security": [
           {
@@ -902,9 +860,7 @@
     },
     "/api/v1/hazards": {
       "get": {
-        "tags": [
-          "Hazards"
-        ],
+        "tags": ["Hazards"],
         "summary": "List hazards",
         "responses": {
           "200": {
@@ -920,9 +876,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Hazards"
-        ],
+        "tags": ["Hazards"],
         "summary": "Report hazard (supports optional image upload)",
         "security": [
           {
@@ -938,20 +892,11 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "type",
-                  "lat",
-                  "lng"
-                ],
+                "required": ["type", "lat", "lng"],
                 "properties": {
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "pothole",
-                      "flood",
-                      "accident",
-                      "roadblock"
-                    ]
+                    "enum": ["pothole", "flood", "accident", "roadblock"]
                   },
                   "description": {
                     "type": "string"
@@ -993,9 +938,7 @@
     },
     "/api/v1/hazards/potholes": {
       "get": {
-        "tags": [
-          "Hazards"
-        ],
+        "tags": ["Hazards"],
         "summary": "List pothole zones",
         "responses": {
           "200": {
@@ -1013,9 +956,7 @@
     },
     "/api/v1/hazards/{id}/status": {
       "patch": {
-        "tags": [
-          "Hazards"
-        ],
+        "tags": ["Hazards"],
         "summary": "Admin update hazard status",
         "security": [
           {
@@ -1065,9 +1006,7 @@
     },
     "/api/v1/hazards/{id}/zone": {
       "post": {
-        "tags": [
-          "Hazards"
-        ],
+        "tags": ["Hazards"],
         "summary": "Admin add pothole zone for hazard",
         "security": [
           {
@@ -1117,9 +1056,7 @@
     },
     "/api/v1/ai/reroute-suggest": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Driver reroute suggestion via Gemini",
         "security": [
           {
@@ -1167,9 +1104,7 @@
     },
     "/api/v1/ai/travel-tips": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Commuter or driver travel tips via Gemini",
         "security": [
           {
@@ -1214,9 +1149,7 @@
     },
     "/api/v1/users/me": {
       "get": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Get authenticated user profile",
         "security": [
           {
@@ -1246,9 +1179,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Update authenticated user profile",
         "security": [
           {
@@ -1296,9 +1227,7 @@
     },
     "/api/v1/users": {
       "get": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Admin list users",
         "security": [
           {
@@ -1330,9 +1259,7 @@
     },
     "/api/v1/users/{user_id}/role": {
       "patch": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Admin update user role",
         "security": [
           {
@@ -1385,9 +1312,7 @@
     },
     "/api/v1/terminals": {
       "get": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "List terminals",
         "responses": {
           "200": {
@@ -1403,9 +1328,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Admin create terminal",
         "security": [
           {
@@ -1450,9 +1373,7 @@
     },
     "/api/v1/terminals/{terminal_id}": {
       "get": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Get terminal detail with waiting spots",
         "parameters": [
           {
@@ -1476,9 +1397,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Admin update terminal",
         "security": [
           {
@@ -1529,9 +1448,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Admin delete terminal",
         "security": [
           {
@@ -1571,9 +1488,7 @@
     },
     "/api/v1/terminals/{terminal_id}/spots": {
       "post": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Admin create waiting spot in a terminal",
         "security": [
           {
@@ -1626,9 +1541,7 @@
     },
     "/api/v1/terminals/spots/{spot_id}": {
       "delete": {
-        "tags": [
-          "Terminals"
-        ],
+        "tags": ["Terminals"],
         "summary": "Admin delete waiting spot",
         "security": [
           {
@@ -1822,10 +1735,7 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "required": [
-          "success",
-          "error"
-        ],
+        "required": ["success", "error"],
         "properties": {
           "success": {
             "type": "boolean",
@@ -1862,11 +1772,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "commuter",
-              "driver",
-              "admin"
-            ]
+            "enum": ["commuter", "driver", "admin"]
           },
           "is_admin": {
             "type": "boolean"
@@ -1875,11 +1781,7 @@
       },
       "RegisterRequest": {
         "type": "object",
-        "required": [
-          "username",
-          "password",
-          "role"
-        ],
+        "required": ["username", "password", "role"],
         "properties": {
           "username": {
             "type": "string",
@@ -1891,21 +1793,13 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "commuter",
-              "driver",
-              "citizen",
-              "admin"
-            ]
+            "enum": ["commuter", "driver", "citizen", "admin"]
           }
         }
       },
       "LoginRequest": {
         "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
+        "required": ["username", "password"],
         "properties": {
           "username": {
             "type": "string"
@@ -1986,10 +1880,7 @@
       },
       "CreateRouteRequest": {
         "type": "object",
-        "required": [
-          "name",
-          "code"
-        ],
+        "required": ["name", "code"],
         "properties": {
           "name": {
             "type": "string",
@@ -2047,11 +1938,7 @@
       },
       "WaypointRequest": {
         "type": "object",
-        "required": [
-          "sequence",
-          "lat",
-          "lng"
-        ],
+        "required": ["sequence", "lat", "lng"],
         "properties": {
           "sequence": {
             "type": "integer",
@@ -2164,11 +2051,7 @@
       },
       "GPSBroadcastRequest": {
         "type": "object",
-        "required": [
-          "route_id",
-          "lat",
-          "lng"
-        ],
+        "required": ["route_id", "lat", "lng"],
         "properties": {
           "route_id": {
             "type": "string",
@@ -2246,9 +2129,7 @@
       },
       "DriverRouteSessionRequest": {
         "type": "object",
-        "required": [
-          "route_id"
-        ],
+        "required": ["route_id"],
         "properties": {
           "route_id": {
             "type": "string",
@@ -2365,20 +2246,11 @@
       },
       "HazardCreateRequest": {
         "type": "object",
-        "required": [
-          "type",
-          "lat",
-          "lng"
-        ],
+        "required": ["type", "lat", "lng"],
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "pothole",
-              "flood",
-              "accident",
-              "roadblock"
-            ]
+            "enum": ["pothole", "flood", "accident", "roadblock"]
           },
           "description": {
             "type": "string"
@@ -2396,11 +2268,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "pending",
-              "verified",
-              "resolved"
-            ]
+            "enum": ["pending", "verified", "resolved"]
           }
         }
       },
@@ -2466,12 +2334,7 @@
       },
       "PotholeZoneRequest": {
         "type": "object",
-        "required": [
-          "start_lat",
-          "start_lng",
-          "end_lat",
-          "end_lng"
-        ],
+        "required": ["start_lat", "start_lng", "end_lat", "end_lng"],
         "properties": {
           "start_lat": {
             "type": "number"
@@ -2541,9 +2404,7 @@
       },
       "RerouteSuggestRequest": {
         "type": "object",
-        "required": [
-          "route_id"
-        ],
+        "required": ["route_id"],
         "properties": {
           "route_id": {
             "type": "string",
@@ -2581,12 +2442,7 @@
           },
           "objective": {
             "type": "string",
-            "enum": [
-              "fastest",
-              "least_crowded",
-              "safer",
-              "balanced"
-            ]
+            "enum": ["fastest", "least_crowded", "safer", "balanced"]
           }
         }
       },
@@ -2598,11 +2454,7 @@
           },
           "risk_level": {
             "type": "string",
-            "enum": [
-              "low",
-              "medium",
-              "high"
-            ]
+            "enum": ["low", "medium", "high"]
           },
           "recommendations": {
             "type": "array",
@@ -2720,11 +2572,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "commuter",
-              "driver",
-              "admin"
-            ]
+            "enum": ["commuter", "driver", "admin"]
           },
           "is_admin": {
             "type": "boolean"
@@ -2747,17 +2595,11 @@
       },
       "UpdateUserRoleRequest": {
         "type": "object",
-        "required": [
-          "role"
-        ],
+        "required": ["role"],
         "properties": {
           "role": {
             "type": "string",
-            "enum": [
-              "commuter",
-              "driver",
-              "admin"
-            ]
+            "enum": ["commuter", "driver", "admin"]
           }
         }
       },
@@ -2887,11 +2729,7 @@
       },
       "CreateTerminalRequest": {
         "type": "object",
-        "required": [
-          "name",
-          "lat",
-          "lng"
-        ],
+        "required": ["name", "lat", "lng"],
         "properties": {
           "name": {
             "type": "string",
@@ -2934,12 +2772,7 @@
       },
       "CreateWaitingSpotRequest": {
         "type": "object",
-        "required": [
-          "route_id",
-          "label",
-          "lat",
-          "lng"
-        ],
+        "required": ["route_id", "label", "lat", "lng"],
         "properties": {
           "route_id": {
             "type": "string",
