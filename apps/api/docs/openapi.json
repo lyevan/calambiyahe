@@ -1,0 +1,3020 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CalamBiyahe API",
+    "version": "1.0.0",
+    "description": "Swagger-style OpenAPI spec for the CalamBiyahe API.\nScope is Calamba City, Laguna only.\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Routes Public"
+    },
+    {
+      "name": "Routes Admin"
+    },
+    {
+      "name": "GPS"
+    },
+    {
+      "name": "Heatmap"
+    },
+    {
+      "name": "Hazards"
+    },
+    {
+      "name": "AI"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Terminals"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "API is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthRegisterSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login success",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Signed cookie token may be set",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthLoginSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          }
+        }
+      }
+    },
+    "/api/v1/routes": {
+      "get": {
+        "tags": [
+          "Routes Public"
+        ],
+        "summary": "List routes (active by default)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "all",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "description": "Set to true to include inactive routes"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutesListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/routes/{id}": {
+      "get": {
+        "tags": [
+          "Routes Public"
+        ],
+        "summary": "Get route details",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/routes": {
+      "get": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin list routes",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "all",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutesListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin create route",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRouteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Route created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/routes/{id}": {
+      "get": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin get route details",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin update route",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRouteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Route updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin delete route",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Route deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/routes/{id}/waypoints": {
+      "post": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin add waypoint",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaypointRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Waypoint added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaypointSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin replace all waypoints",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WaypointRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Waypoints replaced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaypointsSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/routes/{id}/waypoints/{wid}": {
+      "delete": {
+        "tags": [
+          "Routes Admin"
+        ],
+        "summary": "Admin delete waypoint",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteId"
+          },
+          {
+            "$ref": "#/components/parameters/WaypointId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Waypoint deleted and resequenced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaypointsSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/broadcast": {
+      "post": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Broadcast GPS signal",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GPSBroadcastRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signal created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/signals/{route_id}": {
+      "get": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Get active signals by route",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteIdRouteParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signals list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalsListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/signal/{signal_id}": {
+      "delete": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Delete signal manually",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignalId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signal removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/driver/start-route": {
+      "post": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Driver start active route session",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DriverRouteSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Driver session started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverSessionSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/driver/end-route": {
+      "post": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Driver end active route session",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Driver session ended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverSessionSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/gps/driver/active-route": {
+      "get": {
+        "tags": [
+          "GPS"
+        ],
+        "summary": "Driver get active route session",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverSessionDataResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/heatmap/{route_id}": {
+      "get": {
+        "tags": [
+          "Heatmap"
+        ],
+        "summary": "Get route-scoped heatmap",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RouteIdRouteParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Heatmap data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/hazards": {
+      "get": {
+        "tags": [
+          "Hazards"
+        ],
+        "summary": "List hazards",
+        "responses": {
+          "200": {
+            "description": "Hazard list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HazardsListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Hazards"
+        ],
+        "summary": "Report hazard (supports optional image upload)",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "lat",
+                  "lng"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "pothole",
+                      "flood",
+                      "accident",
+                      "roadblock"
+                    ]
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lng": {
+                    "type": "number"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Hazard reported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HazardSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          }
+        }
+      }
+    },
+    "/api/v1/hazards/potholes": {
+      "get": {
+        "tags": [
+          "Hazards"
+        ],
+        "summary": "List pothole zones",
+        "responses": {
+          "200": {
+            "description": "Pothole zone list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PotholeZonesListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hazards/{id}/status": {
+      "patch": {
+        "tags": [
+          "Hazards"
+        ],
+        "summary": "Admin update hazard status",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/HazardId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HazardStatusUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hazard updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HazardSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        }
+      }
+    },
+    "/api/v1/hazards/{id}/zone": {
+      "post": {
+        "tags": [
+          "Hazards"
+        ],
+        "summary": "Admin add pothole zone for hazard",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/HazardId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PotholeZoneRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pothole zone created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PotholeZoneSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/reroute-suggest": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Driver reroute suggestion via Gemini",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RerouteSuggestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI reroute suggestion generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIRerouteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/travel-tips": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Commuter or driver travel tips via Gemini",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TravelTipsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI travel tips generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AITravelTipsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get authenticated user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update authenticated user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyProfileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error400"
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Admin list users",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/role": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Admin update user role",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UserId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/terminals": {
+      "get": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "List terminals",
+        "responses": {
+          "200": {
+            "description": "Terminal list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminalsListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Admin create terminal",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTerminalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Terminal created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminalSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          }
+        }
+      }
+    },
+    "/api/v1/terminals/{terminal_id}": {
+      "get": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Get terminal detail with waiting spots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TerminalId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Terminal detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminalDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Admin update terminal",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TerminalId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTerminalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Terminal updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminalSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Admin delete terminal",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TerminalId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Terminal deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/terminals/{terminal_id}/spots": {
+      "post": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Admin create waiting spot in a terminal",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TerminalId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWaitingSpotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Waiting spot created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaitingSpotSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
+    "/api/v1/terminals/spots/{spot_id}": {
+      "delete": {
+        "tags": [
+          "Terminals"
+        ],
+        "summary": "Admin delete waiting spot",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SpotId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Waiting spot deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token"
+      }
+    },
+    "parameters": {
+      "RouteId": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "RouteIdRouteParam": {
+        "in": "path",
+        "name": "route_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "WaypointId": {
+        "in": "path",
+        "name": "wid",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "SignalId": {
+        "in": "path",
+        "name": "signal_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "HazardId": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "UserId": {
+        "in": "path",
+        "name": "user_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "TerminalId": {
+        "in": "path",
+        "name": "terminal_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "SpotId": {
+        "in": "path",
+        "name": "spot_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "Too Many Requests",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "CalamBiyahe API is running"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "error"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Error description"
+          }
+        }
+      },
+      "MessageSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "commuter",
+              "driver",
+              "admin"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password",
+          "role"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "commuter",
+              "driver",
+              "citizen",
+              "admin"
+            ]
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthRegisterSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/User"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthLoginData": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthLoginSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AuthLoginData"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Route": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^CAL-\\\\d{2}$"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateRouteRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "code"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^CAL-\\\\d{2}$"
+          }
+        }
+      },
+      "UpdateRouteRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Waypoint": {
+        "type": "object",
+        "properties": {
+          "waypoint_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "lat": {
+            "type": "string",
+            "example": "14.2116000"
+          },
+          "lng": {
+            "type": "string",
+            "example": "121.1653000"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_key_stop": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WaypointRequest": {
+        "type": "object",
+        "required": [
+          "sequence",
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          },
+          "is_key_stop": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "RouteDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Route"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "waypoints": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Waypoint"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RoutesListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Route"
+            }
+          }
+        }
+      },
+      "RouteDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/RouteDetail"
+          }
+        }
+      },
+      "RouteSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Route"
+          }
+        }
+      },
+      "WaypointSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Waypoint"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "WaypointsSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Waypoint"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "GPSBroadcastRequest": {
+        "type": "object",
+        "required": [
+          "route_id",
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        }
+      },
+      "Signal": {
+        "type": "object",
+        "properties": {
+          "signal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "commuter"
+          },
+          "emitted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SignalSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Signal"
+          }
+        }
+      },
+      "SignalsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Signal"
+            }
+          }
+        }
+      },
+      "DriverRouteSessionRequest": {
+        "type": "object",
+        "required": [
+          "route_id"
+        ],
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DriverSession": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DriverSessionSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/DriverSession"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "DriverSessionDataResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/DriverSession"
+          }
+        }
+      },
+      "HeatmapPoint": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "intensity": {
+            "type": "number"
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "HeatmapData": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_code": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeatmapPoint"
+            }
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HeatmapResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/HeatmapData"
+          }
+        }
+      },
+      "HazardCreateRequest": {
+        "type": "object",
+        "required": [
+          "type",
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "pothole",
+              "flood",
+              "accident",
+              "roadblock"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        }
+      },
+      "HazardStatusUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "verified",
+              "resolved"
+            ]
+          }
+        }
+      },
+      "Hazard": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reporter_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "HazardSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Hazard"
+          }
+        }
+      },
+      "HazardsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Hazard"
+            }
+          }
+        }
+      },
+      "PotholeZoneRequest": {
+        "type": "object",
+        "required": [
+          "start_lat",
+          "start_lng",
+          "end_lat",
+          "end_lng"
+        ],
+        "properties": {
+          "start_lat": {
+            "type": "number"
+          },
+          "start_lng": {
+            "type": "number"
+          },
+          "end_lat": {
+            "type": "number"
+          },
+          "end_lng": {
+            "type": "number"
+          }
+        }
+      },
+      "PotholeZone": {
+        "type": "object",
+        "properties": {
+          "zone_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "report_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start_lat": {
+            "type": "string"
+          },
+          "start_lng": {
+            "type": "string"
+          },
+          "end_lat": {
+            "type": "string"
+          },
+          "end_lng": {
+            "type": "string"
+          }
+        }
+      },
+      "PotholeZoneSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PotholeZone"
+          }
+        }
+      },
+      "PotholeZonesListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PotholeZone"
+            }
+          }
+        }
+      },
+      "RerouteSuggestRequest": {
+        "type": "object",
+        "required": [
+          "route_id"
+        ],
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_lat": {
+            "type": "number"
+          },
+          "current_lng": {
+            "type": "number"
+          },
+          "destination": {
+            "type": "string"
+          },
+          "hazard_summary": {
+            "type": "string"
+          }
+        }
+      },
+      "TravelTipsRequest": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "travel_time": {
+            "type": "string"
+          },
+          "current_lat": {
+            "type": "number"
+          },
+          "current_lng": {
+            "type": "number"
+          },
+          "objective": {
+            "type": "string",
+            "enum": [
+              "fastest",
+              "least_crowded",
+              "safer",
+              "balanced"
+            ]
+          }
+        }
+      },
+      "AIReroutePayload": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cautions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AIRerouteData": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_code": {
+            "type": "string"
+          },
+          "ai": {
+            "$ref": "#/components/schemas/AIReroutePayload"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AIRerouteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AIRerouteData"
+          }
+        }
+      },
+      "AITravelTipsPayload": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "best_times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "avoid_times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AITravelTipsData": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "route_code": {
+            "type": "string",
+            "nullable": true
+          },
+          "ai": {
+            "$ref": "#/components/schemas/AITravelTipsPayload"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AITravelTipsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AITravelTipsData"
+          }
+        }
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "commuter",
+              "driver",
+              "admin"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateMyProfileRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          }
+        }
+      },
+      "UpdateUserRoleRequest": {
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "commuter",
+              "driver",
+              "admin"
+            ]
+          }
+        }
+      },
+      "UserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        }
+      },
+      "UserProfileSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UsersListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserProfile"
+            }
+          }
+        }
+      },
+      "Terminal": {
+        "type": "object",
+        "properties": {
+          "terminal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WaitingSpot": {
+        "type": "object",
+        "properties": {
+          "spot_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "terminal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "string"
+          },
+          "lng": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TerminalDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Terminal"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "waiting_spots": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WaitingSpot"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateTerminalRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 255
+          }
+        }
+      },
+      "UpdateTerminalRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 255
+          }
+        }
+      },
+      "CreateWaitingSpotRequest": {
+        "type": "object",
+        "required": [
+          "route_id",
+          "label",
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        }
+      },
+      "TerminalSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Terminal"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TerminalsListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Terminal"
+            }
+          }
+        }
+      },
+      "TerminalDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/TerminalDetail"
+          }
+        }
+      },
+      "WaitingSpotSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/WaitingSpot"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
