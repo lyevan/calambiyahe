@@ -1,5 +1,12 @@
 import { usersRepository } from "./users.repository";
 
+type SelectableUserRole =
+  | "commuter"
+  | "driver"
+  | "private_driver"
+  | "citizen"
+  | "guide";
+
 type ServiceError = Error & { statusCode?: number };
 
 function createServiceError(message: string, statusCode: number): ServiceError {
@@ -37,7 +44,7 @@ export const usersService = {
     return await usersRepository.listUsers();
   },
 
-  async updateUserRole(user_id: string, role: "commuter" | "driver" | "admin") {
+  async updateUserRole(user_id: string, role: SelectableUserRole) {
     const user = await usersRepository.getById(user_id);
     if (!user) {
       throw createServiceError("User not found", 404);

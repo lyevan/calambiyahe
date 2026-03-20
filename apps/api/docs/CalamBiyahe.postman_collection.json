@@ -1,1002 +1,952 @@
 {
-    "info":  {
-                 "name":  "CalamBiyahe API",
-                 "_postman_id":  "e36ce6dc-3d8d-4f6d-b6e0-7fd529139f5a",
-                 "description":  "Postman collection for CalamBiyahe API (Calamba scoped). Includes auth, routes, GPS, heatmap, and hazards endpoints.",
-                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-             },
-    "variable":  [
-                     {
-                         "key":  "baseUrl",
-                         "value":  "http://localhost:3000"
-                     },
-                     {
-                         "key":  "apiV1",
-                         "value":  "{{baseUrl}}/api/v1"
-                     },
-                     {
-                         "key":  "userToken",
-                         "value":  ""
-                     },
-                     {
-                         "key":  "adminToken",
-                         "value":  ""
-                     },
-                     {
-                         "key":  "routeId",
-                         "value":  "00000000-0000-0000-0000-000000000001"
-                     },
-                     {
-                         "key":  "waypointId",
-                         "value":  "00000000-0000-0000-0000-000000000002"
-                     },
-                     {
-                         "key":  "signalId",
-                         "value":  "00000000-0000-0000-0000-000000000003"
-                     },
-                     {
-                         "key":  "hazardId",
-                         "value":  "00000000-0000-0000-0000-000000000004"
-                     }
-                 ],
-    "item":  [
-                 {
-                     "name":  "Health",
-                     "item":  [
-                                  {
-                                      "name":  "GET /health",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{baseUrl}}/health",
-                                                      "description":  "Health check endpoint."
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Auth",
-                     "item":  [
-                                  {
-                                      "name":  "POST /api/v1/auth/register",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"username\": \"commuter1\",\n  \"password\": \"password123\",\n  \"role\": \"commuter\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/auth/register",
-                                                      "description":  "Register user with role commuter | driver | admin."
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/auth/login (User)",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const body = pm.response.json();",
-                                                                                    "if (body?.data?.token) {",
-                                                                                    "  pm.collectionVariables.set(\u0027userToken\u0027, body.data.token);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"username\": \"commuter1\",\n  \"password\": \"password123\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/auth/login"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/auth/login (Admin)",
-                                      "event":  [
-                                                    {
-                                                        "listen":  "test",
-                                                        "script":  {
-                                                                       "type":  "text/javascript",
-                                                                       "exec":  [
-                                                                                    "const body = pm.response.json();",
-                                                                                    "if (body?.data?.token) {",
-                                                                                    "  pm.collectionVariables.set(\u0027adminToken\u0027, body.data.token);",
-                                                                                    "}"
-                                                                                ]
-                                                                   }
-                                                    }
-                                                ],
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"username\": \"admin1\",\n  \"password\": \"password123\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/auth/login"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Routes (Public)",
-                     "item":  [
-                                  {
-                                      "name":  "GET /api/v1/routes",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{apiV1}}/routes"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET /api/v1/routes/:id",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{apiV1}}/routes/{{routeId}}"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Routes (Admin)",
-                     "item":  [
-                                  {
-                                      "name":  "GET /api/v1/admin/routes",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{apiV1}}/admin/routes?all=true"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/admin/routes",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"name\": \"CAL-01 — Crossing to Parian\",\n  \"code\": \"CAL-01\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET /api/v1/admin/routes/:id",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH /api/v1/admin/routes/:id",
-                                      "request":  {
-                                                      "method":  "PATCH",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"name\": \"CAL-01 — Crossing to Parian (Updated)\",\n  \"is_active\": true\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "DELETE /api/v1/admin/routes/:id",
-                                      "request":  {
-                                                      "method":  "DELETE",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/admin/routes/:id/waypoints",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"sequence\": 1,\n  \"lat\": 14.2116,\n  \"lng\": 121.1653,\n  \"label\": \"Crossing\",\n  \"is_key_stop\": true\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}/waypoints"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PUT /api/v1/admin/routes/:id/waypoints",
-                                      "request":  {
-                                                      "method":  "PUT",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "[\n  {\n    \"sequence\": 1,\n    \"lat\": 14.2116,\n    \"lng\": 121.1653,\n    \"label\": \"Crossing\",\n    \"is_key_stop\": true\n  },\n  {\n    \"sequence\": 2,\n    \"lat\": 14.2098,\n    \"lng\": 121.1641,\n    \"label\": \"Town Plaza\",\n    \"is_key_stop\": true\n  }\n]"
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}/waypoints"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "DELETE /api/v1/admin/routes/:id/waypoints/:wid",
-                                      "request":  {
-                                                      "method":  "DELETE",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/admin/routes/{{routeId}}/waypoints/{{waypointId}}"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "GPS",
-                     "item":  [
-                                  {
-                                      "name":  "POST /api/v1/gps/broadcast",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"route_id\": \"{{routeId}}\",\n  \"lat\": 14.2116,\n  \"lng\": 121.1653\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/broadcast"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET /api/v1/gps/signals/:route_id",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/signals/{{routeId}}"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "DELETE /api/v1/gps/signal/:signal_id",
-                                      "request":  {
-                                                      "method":  "DELETE",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/signal/{{signalId}}"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/gps/driver/start-route",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"route_id\": \"{{routeId}}\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/driver/start-route"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/gps/driver/end-route",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/driver/end-route"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET /api/v1/gps/driver/active-route",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/gps/driver/active-route"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Heatmap",
-                     "item":  [
-                                  {
-                                      "name":  "GET /api/v1/heatmap/:route_id",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "url":  "{{apiV1}}/heatmap/{{routeId}}"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Hazards",
-                     "item":  [
-                                  {
-                                      "name":  "GET /api/v1/hazards",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{apiV1}}/hazards"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "GET /api/v1/hazards/potholes",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  [
-
-                                                                 ],
-                                                      "url":  "{{apiV1}}/hazards/potholes"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/hazards (multipart)",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "body":  {
-                                                                   "mode":  "formdata",
-                                                                   "formdata":  [
-                                                                                    {
-                                                                                        "key":  "type",
-                                                                                        "value":  "pothole",
-                                                                                        "type":  "text"
-                                                                                    },
-                                                                                    {
-                                                                                        "key":  "description",
-                                                                                        "value":  "Large pothole near market",
-                                                                                        "type":  "text"
-                                                                                    },
-                                                                                    {
-                                                                                        "key":  "lat",
-                                                                                        "value":  "14.2116",
-                                                                                        "type":  "text"
-                                                                                    },
-                                                                                    {
-                                                                                        "key":  "lng",
-                                                                                        "value":  "121.1653",
-                                                                                        "type":  "text"
-                                                                                    },
-                                                                                    {
-                                                                                        "key":  "image",
-                                                                                        "type":  "file",
-                                                                                        "src":  ""
-                                                                                    }
-                                                                                ]
-                                                               },
-                                                      "url":  "{{apiV1}}/hazards"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "PATCH /api/v1/hazards/:id/status (Admin)",
-                                      "request":  {
-                                                      "method":  "PATCH",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"status\": \"verified\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/hazards/{{hazardId}}/status"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/hazards/:id/zone (Admin)",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{adminToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"start_lat\": 14.2116,\n  \"start_lng\": 121.1653,\n  \"end_lat\": 14.212,\n  \"end_lng\": 121.166\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/hazards/{{hazardId}}/zone"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "AI",
-                     "item":  [
-                                  {
-                                      "name":  "POST /api/v1/ai/reroute-suggest",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"route_id\": \"{{routeId}}\",\n  \"current_lat\": 14.2116,\n  \"current_lng\": 121.1653,\n  \"destination\": \"Parian Terminal\",\n  \"hazard_summary\": \"Optional short context\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/ai/reroute-suggest"
-                                                  }
-                                  },
-                                  {
-                                      "name":  "POST /api/v1/ai/travel-tips",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "auth":  {
-                                                                   "type":  "bearer",
-                                                                   "bearer":  [
-                                                                                  {
-                                                                                      "key":  "token",
-                                                                                      "value":  "{{userToken}}",
-                                                                                      "type":  "string"
-                                                                                  }
-                                                                              ]
-                                                               },
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\n  \"route_id\": \"{{routeId}}\",\n  \"travel_time\": \"6:30 PM\",\n  \"objective\": \"balanced\"\n}"
-                                                               },
-                                                      "url":  "{{apiV1}}/ai/travel-tips"
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Users",
-                     "item":  [
-                                  {
-                                      "name":  "Get My Profile",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  {
-                                                                     "value":  [
-                                                                                   {
-                                                                                       "key":  "Authorization",
-                                                                                       "value":  "Bearer {{token}}"
-                                                                                   }
-                                                                               ],
-                                                                     "Count":  1
-                                                                 },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/users/me",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "users",
-                                                                               "me"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Update My Profile",
-                                      "request":  {
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Authorization",
-                                                                         "value":  "Bearer {{token}}"
-                                                                     },
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\"username\":\"new_username\"}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/users/me",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "users",
-                                                                               "me"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin List Users",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "header":  {
-                                                                     "value":  [
-                                                                                   {
-                                                                                       "key":  "Authorization",
-                                                                                       "value":  "Bearer {{token}}"
-                                                                                   }
-                                                                               ],
-                                                                     "Count":  1
-                                                                 },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/users",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "users"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Update User Role",
-                                      "request":  {
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Authorization",
-                                                                         "value":  "Bearer {{token}}"
-                                                                     },
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\"role\":\"driver\"}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/users/{{userId}}/role",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "users",
-                                                                               "{{userId}}",
-                                                                               "role"
-                                                                           ]
-                                                              }
-                                                  }
-                                  }
-                              ]
-                 },
-                 {
-                     "name":  "Terminals",
-                     "item":  [
-                                  {
-                                      "name":  "List Terminals",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Get Terminal Detail",
-                                      "request":  {
-                                                      "method":  "GET",
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals",
-                                                                               "{{terminalId}}"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Create Terminal",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Authorization",
-                                                                         "value":  "Bearer {{token}}"
-                                                                     },
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\"name\":\"Crossing Terminal\",\"lat\":14.2116,\"lng\":121.1653,\"address\":\"Crossing, Calamba\"}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Update Terminal",
-                                      "request":  {
-                                                      "method":  "PATCH",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Authorization",
-                                                                         "value":  "Bearer {{token}}"
-                                                                     },
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\"name\":\"Updated Terminal\"}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals",
-                                                                               "{{terminalId}}"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Delete Terminal",
-                                      "request":  {
-                                                      "method":  "DELETE",
-                                                      "header":  {
-                                                                     "value":  [
-                                                                                   {
-                                                                                       "key":  "Authorization",
-                                                                                       "value":  "Bearer {{token}}"
-                                                                                   }
-                                                                               ],
-                                                                     "Count":  1
-                                                                 },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals",
-                                                                               "{{terminalId}}"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Add Waiting Spot",
-                                      "request":  {
-                                                      "method":  "POST",
-                                                      "header":  [
-                                                                     {
-                                                                         "key":  "Authorization",
-                                                                         "value":  "Bearer {{token}}"
-                                                                     },
-                                                                     {
-                                                                         "key":  "Content-Type",
-                                                                         "value":  "application/json"
-                                                                     }
-                                                                 ],
-                                                      "body":  {
-                                                                   "mode":  "raw",
-                                                                   "raw":  "{\"route_id\":\"{{routeId}}\",\"label\":\"Parian Spot\",\"lat\":14.212,\"lng\":121.165}"
-                                                               },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals/{{terminalId}}/spots",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals",
-                                                                               "{{terminalId}}",
-                                                                               "spots"
-                                                                           ]
-                                                              }
-                                                  }
-                                  },
-                                  {
-                                      "name":  "Admin Delete Waiting Spot",
-                                      "request":  {
-                                                      "method":  "DELETE",
-                                                      "header":  {
-                                                                     "value":  [
-                                                                                   {
-                                                                                       "key":  "Authorization",
-                                                                                       "value":  "Bearer {{token}}"
-                                                                                   }
-                                                                               ],
-                                                                     "Count":  1
-                                                                 },
-                                                      "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/v1/terminals/spots/{{spotId}}",
-                                                                  "host":  [
-                                                                               "{{baseUrl}}"
-                                                                           ],
-                                                                  "path":  [
-                                                                               "api",
-                                                                               "v1",
-                                                                               "terminals",
-                                                                               "spots",
-                                                                               "{{spotId}}"
-                                                                           ]
-                                                              }
-                                                  }
-                                  }
-                              ]
-                 }
-             ]
+  "info": {
+    "name": "CalamBiyahe API",
+    "_postman_id": "e36ce6dc-3d8d-4f6d-b6e0-7fd529139f5a",
+    "description": "Postman collection for CalamBiyahe API (Calamba scoped). Includes auth, routes, GPS, heatmap, and hazards endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "apiV1",
+      "value": "{{baseUrl}}/api/v1"
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "routeId",
+      "value": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "waypointId",
+      "value": "00000000-0000-0000-0000-000000000002"
+    },
+    {
+      "key": "signalId",
+      "value": "00000000-0000-0000-0000-000000000003"
+    },
+    {
+      "key": "hazardId",
+      "value": "00000000-0000-0000-0000-000000000004"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Health check endpoint."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/v1/auth/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"commuter1\",\n  \"password\": \"password123\",\n  \"role\": \"commuter\"\n}"
+            },
+            "url": "{{apiV1}}/auth/register",
+            "description": "Register user with role commuter | driver | private_driver | citizen | guide."
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?.token) {",
+                  "  pm.collectionVariables.set(\u0027userToken\u0027, body.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"commuter1\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{apiV1}}/auth/login"
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?.token) {",
+                  "  pm.collectionVariables.set(\u0027adminToken\u0027, body.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin1\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{apiV1}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Routes (Public)",
+      "item": [
+        {
+          "name": "GET /api/v1/routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{apiV1}}/routes"
+          }
+        },
+        {
+          "name": "GET /api/v1/routes/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{apiV1}}/routes/{{routeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Routes (Admin)",
+      "item": [
+        {
+          "name": "GET /api/v1/admin/routes",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [],
+            "url": "{{apiV1}}/admin/routes?all=true"
+          }
+        },
+        {
+          "name": "POST /api/v1/admin/routes",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CAL-01 — Crossing to Parian\",\n  \"code\": \"CAL-01\"\n}"
+            },
+            "url": "{{apiV1}}/admin/routes"
+          }
+        },
+        {
+          "name": "GET /api/v1/admin/routes/:id",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/admin/routes/:id",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CAL-01 — Crossing to Parian (Updated)\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}"
+          }
+        },
+        {
+          "name": "DELETE /api/v1/admin/routes/:id",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}"
+          }
+        },
+        {
+          "name": "POST /api/v1/admin/routes/:id/waypoints",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sequence\": 1,\n  \"lat\": 14.2116,\n  \"lng\": 121.1653,\n  \"label\": \"Crossing\",\n  \"is_key_stop\": true\n}"
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}/waypoints"
+          }
+        },
+        {
+          "name": "PUT /api/v1/admin/routes/:id/waypoints",
+          "request": {
+            "method": "PUT",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"sequence\": 1,\n    \"lat\": 14.2116,\n    \"lng\": 121.1653,\n    \"label\": \"Crossing\",\n    \"is_key_stop\": true\n  },\n  {\n    \"sequence\": 2,\n    \"lat\": 14.2098,\n    \"lng\": 121.1641,\n    \"label\": \"Town Plaza\",\n    \"is_key_stop\": true\n  }\n]"
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}/waypoints"
+          }
+        },
+        {
+          "name": "DELETE /api/v1/admin/routes/:id/waypoints/:wid",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/admin/routes/{{routeId}}/waypoints/{{waypointId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPS",
+      "item": [
+        {
+          "name": "POST /api/v1/gps/broadcast",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"route_id\": \"{{routeId}}\",\n  \"lat\": 14.2116,\n  \"lng\": 121.1653\n}"
+            },
+            "url": "{{apiV1}}/gps/broadcast"
+          }
+        },
+        {
+          "name": "GET /api/v1/gps/signals/:route_id",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/gps/signals/{{routeId}}"
+          }
+        },
+        {
+          "name": "DELETE /api/v1/gps/signal/:signal_id",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/gps/signal/{{signalId}}"
+          }
+        },
+        {
+          "name": "POST /api/v1/gps/driver/start-route",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"route_id\": \"{{routeId}}\"\n}"
+            },
+            "url": "{{apiV1}}/gps/driver/start-route"
+          }
+        },
+        {
+          "name": "POST /api/v1/gps/driver/end-route",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/gps/driver/end-route"
+          }
+        },
+        {
+          "name": "GET /api/v1/gps/driver/active-route",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/gps/driver/active-route"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Heatmap",
+      "item": [
+        {
+          "name": "GET /api/v1/heatmap/:route_id",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{apiV1}}/heatmap/{{routeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hazards",
+      "item": [
+        {
+          "name": "GET /api/v1/hazards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{apiV1}}/hazards"
+          }
+        },
+        {
+          "name": "GET /api/v1/hazards/potholes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{apiV1}}/hazards/potholes"
+          }
+        },
+        {
+          "name": "POST /api/v1/hazards (multipart)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "type",
+                  "value": "pothole",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Large pothole near market",
+                  "type": "text"
+                },
+                {
+                  "key": "lat",
+                  "value": "14.2116",
+                  "type": "text"
+                },
+                {
+                  "key": "lng",
+                  "value": "121.1653",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{apiV1}}/hazards"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/hazards/:id/status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"verified\"\n}"
+            },
+            "url": "{{apiV1}}/hazards/{{hazardId}}/status"
+          }
+        },
+        {
+          "name": "POST /api/v1/hazards/:id/zone (Admin)",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_lat\": 14.2116,\n  \"start_lng\": 121.1653,\n  \"end_lat\": 14.212,\n  \"end_lng\": 121.166\n}"
+            },
+            "url": "{{apiV1}}/hazards/{{hazardId}}/zone"
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "POST /api/v1/ai/reroute-suggest",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"route_id\": \"{{routeId}}\",\n  \"current_lat\": 14.2116,\n  \"current_lng\": 121.1653,\n  \"destination\": \"Parian Terminal\",\n  \"hazard_summary\": \"Optional short context\"\n}"
+            },
+            "url": "{{apiV1}}/ai/reroute-suggest"
+          }
+        },
+        {
+          "name": "POST /api/v1/ai/travel-tips",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"route_id\": \"{{routeId}}\",\n  \"travel_time\": \"6:30 PM\",\n  \"objective\": \"balanced\"\n}"
+            },
+            "url": "{{apiV1}}/ai/travel-tips"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": {
+              "value": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "Count": 1
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"new_username\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update My Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?.token) {",
+                  "  pm.collectionVariables.set('userToken', body.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\":\"guide\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "me", "role"]
+            }
+          }
+        },
+        {
+          "name": "Admin List Users",
+          "request": {
+            "method": "GET",
+            "header": {
+              "value": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "Count": 1
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            }
+          }
+        },
+        {
+          "name": "Admin Update User Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\":\"driver\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}", "role"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Terminals",
+      "item": [
+        {
+          "name": "List Terminals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals"]
+            }
+          }
+        },
+        {
+          "name": "Get Terminal Detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals", "{{terminalId}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin Create Terminal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Crossing Terminal\",\"lat\":14.2116,\"lng\":121.1653,\"address\":\"Crossing, Calamba\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals"]
+            }
+          }
+        },
+        {
+          "name": "Admin Update Terminal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Updated Terminal\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals", "{{terminalId}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Terminal",
+          "request": {
+            "method": "DELETE",
+            "header": {
+              "value": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "Count": 1
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals/{{terminalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals", "{{terminalId}}"]
+            }
+          }
+        },
+        {
+          "name": "Admin Add Waiting Spot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"route_id\":\"{{routeId}}\",\"label\":\"Parian Spot\",\"lat\":14.212,\"lng\":121.165}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals/{{terminalId}}/spots",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals", "{{terminalId}}", "spots"]
+            }
+          }
+        },
+        {
+          "name": "Admin Delete Waiting Spot",
+          "request": {
+            "method": "DELETE",
+            "header": {
+              "value": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}"
+                }
+              ],
+              "Count": 1
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/terminals/spots/{{spotId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "terminals", "spots", "{{spotId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
 }

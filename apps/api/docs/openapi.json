@@ -1225,6 +1225,51 @@
         }
       }
     },
+    "/api/v1/users/me/role": {
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update authenticated user role",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthLoginSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          }
+        }
+      }
+    },
     "/api/v1/users": {
       "get": {
         "tags": ["Users"],
@@ -1772,7 +1817,14 @@
           },
           "role": {
             "type": "string",
-            "enum": ["commuter", "driver", "admin"]
+            "enum": [
+              "commuter",
+              "driver",
+              "private_driver",
+              "citizen",
+              "guide",
+              "admin"
+            ]
           },
           "is_admin": {
             "type": "boolean"
@@ -1793,7 +1845,7 @@
           },
           "role": {
             "type": "string",
-            "enum": ["commuter", "driver", "citizen", "admin"]
+            "enum": ["commuter", "driver", "private_driver", "citizen", "guide"]
           }
         }
       },
@@ -2572,7 +2624,14 @@
           },
           "role": {
             "type": "string",
-            "enum": ["commuter", "driver", "admin"]
+            "enum": [
+              "commuter",
+              "driver",
+              "private_driver",
+              "citizen",
+              "guide",
+              "admin"
+            ]
           },
           "is_admin": {
             "type": "boolean"
@@ -2599,7 +2658,7 @@
         "properties": {
           "role": {
             "type": "string",
-            "enum": ["commuter", "driver", "admin"]
+            "enum": ["commuter", "driver", "private_driver", "citizen", "guide"]
           }
         }
       },
