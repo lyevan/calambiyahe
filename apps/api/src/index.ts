@@ -48,7 +48,7 @@ try {
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
-app.use(cookieParser("calambiyahe_secret_2025")); // signed cookies
+app.use(cookieParser(process.env.COOKIES_SECRET)); // signed cookies
 app.use(pino());
 
 // Serving uploaded images
