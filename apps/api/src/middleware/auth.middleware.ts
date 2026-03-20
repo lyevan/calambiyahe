@@ -17,11 +17,18 @@ declare global {
   }
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.signedCookies.token || req.headers.authorization?.split(" ")[1];
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const token =
+    req.signedCookies.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ success: false, error: "Unauthorized: No token provided" });
+    return res
+      .status(401)
+      .json({ success: false, error: "Unauthorized: No token provided" });
   }
 
   try {
@@ -29,13 +36,21 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ success: false, error: "Unauthorized: Invalid token" });
+    res
+      .status(401)
+      .json({ success: false, error: "Unauthorized: Invalid token" });
   }
 };
 
-export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const adminMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   if (!req.user || !req.user.is_admin) {
-    return res.status(403).json({ success: false, error: "Forbidden: Admin access required" });
+    return res
+      .status(403)
+      .json({ success: false, error: "Forbidden: Admin access required" });
   }
   next();
 };

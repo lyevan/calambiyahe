@@ -2,6 +2,13 @@ import { db } from "../../db";
 import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
+type SelectableUserRole =
+  | "commuter"
+  | "driver"
+  | "private_driver"
+  | "citizen"
+  | "guide";
+
 export const usersRepository = {
   async getById(user_id: string) {
     const result = await db
@@ -59,10 +66,10 @@ export const usersRepository = {
     return result[0] ?? null;
   },
 
-  async updateUserRole(user_id: string, role: "commuter" | "driver" | "admin") {
+  async updateUserRole(user_id: string, role: SelectableUserRole) {
     const result = await db
       .update(users)
-      .set({ role, is_admin: role === "admin" })
+      .set({ role, is_admin: false })
       .where(eq(users.user_id, user_id))
       .returning({
         user_id: users.user_id,

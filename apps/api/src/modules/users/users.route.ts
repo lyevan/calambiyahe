@@ -9,6 +9,7 @@ const router = Router();
 
 router.get("/me", authMiddleware, usersController.getMyProfile);
 router.patch("/me", authMiddleware, usersController.updateMyProfile);
+router.patch("/me/role", authMiddleware, usersController.updateMyRole);
 
 router.get("/", authMiddleware, adminMiddleware, usersController.listUsers);
 router.patch(

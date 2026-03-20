@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { usersService } from "./users.service";
 import { updateProfileSchema, updateUserRoleSchema } from "./users.validation";
 
 type ControllerError = Error & { statusCode?: number };
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
 export const usersController = {
   async getMyProfile(req: Request, res: Response) {
@@ -25,6 +28,38 @@ export const usersController = {
         validatedPayload,
       );
       res.json({ success: true, data: profile, message: "Profile updated" });
+    } catch (error) {
+      const typedError = error as ControllerError;
+      res
+        .status(typedError.statusCode ?? 400)
+        .json({ success: false, error: typedError.message });
+    }
+  },
+
+  async updateMyRole(req: Request, res: Response) {
+    try {
+      const validatedPayload = updateUserRoleSchema.parse(req.body);
+      const user = await usersService.updateUserRole(
+        req.user!.user_id,
+        validatedPayload.role,
+      );
+
+      const token = jwt.sign(
+        { user_id: user.user_id, role: user.role, is_admin: user.is_admin },
+        JWT_SECRET,
+        { expiresIn: "24h" },
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      });
+
+      res.json({
+        success: true,
+        data: { user, token },
+        message: "User role updated",
+      });
     } catch (error) {
       const typedError = error as ControllerError;
       res

@@ -5,5 +5,5 @@ export const updateProfileSchema = z.object({
 });
 
 export const updateUserRoleSchema = z.object({
-  role: z.enum(["commuter", "driver", "admin"]),
+  role: z.enum(["commuter", "driver", "private_driver", "citizen", "guide"]),
 });

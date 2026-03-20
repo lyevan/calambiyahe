@@ -33,8 +33,10 @@ Auth middleware also accepts signed cookie token (`token`) if present.
 
 - `commuter`
 - `driver`
+- `private_driver`
 - `citizen`
-- `admin`
+- `guide`
+- `admin` (system-managed; not selectable from mobile role picker)
 
 ### Admin-only Access
 
@@ -77,7 +79,7 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 {
   "username": "string (min 3)",
   "password": "string (min 6)",
-  "role": "commuter | driver | admin"
+  "role": "commuter | driver | private_driver | citizen | guide"
 }
 ```
 
@@ -680,6 +682,25 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 
 - `username` must be unique.
 
+### PATCH `/api/v1/users/me/role`
+
+- **Auth:** Any authenticated user
+- **Description:** Switches current user's role for mobile role selection flow.
+- **Body:**
+
+```json
+{
+  "role": "guide"
+}
+```
+
+`role` can be: `commuter`, `driver`, `private_driver`, `citizen`, `guide`
+
+**Response Notes**
+
+- Returns updated user and a refreshed JWT token in `data.token`.
+- Client should replace the stored token after role switch.
+
 ### GET `/api/v1/users`
 
 - **Auth:** Admin
@@ -696,7 +717,7 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 }
 ```
 
-`role` can be: `commuter`, `driver`, `admin`
+`role` can be: `commuter`, `driver`, `private_driver`, `citizen`, `guide`
 
 **Users Endpoint Errors**
 

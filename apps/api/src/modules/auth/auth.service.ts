@@ -6,6 +6,10 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
 export const authService = {
   async register(data: any) {
+    if (data.role === "admin") {
+      throw new Error("Admin role cannot be selected during registration");
+    }
+
     const existingUser = await authRepository.findUserByUsername(data.username);
     if (existingUser) {
       throw new Error("Username already exists");
@@ -15,7 +19,7 @@ export const authService = {
     const user = await authRepository.createUser({
       ...data,
       password: hashedPassword,
-      is_admin: data.role === "admin",
+      is_admin: false,
     });
 
     const { password, ...result } = user;
@@ -36,7 +40,7 @@ export const authService = {
     const token = jwt.sign(
       { user_id: user.user_id, role: user.role, is_admin: user.is_admin },
       JWT_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
 
     const { password, ...userRecord } = user;
