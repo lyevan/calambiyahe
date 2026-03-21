@@ -77,7 +77,8 @@ export const aiRepository = {
       .map((w) => w.label as string);
 
     const firstLabel = waypointRows.find((w) => w.label)?.label ?? null;
-    const lastLabel = [...waypointRows].reverse().find((w) => w.label)?.label ?? null;
+    const lastLabel =
+      [...waypointRows].reverse().find((w) => w.label)?.label ?? null;
 
     return {
       routeId: r.route_id,
