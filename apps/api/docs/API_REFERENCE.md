@@ -581,20 +581,19 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 
 ## 8) AI
 
-> Requires authenticated user. Gemini is used when `GEMINI_API_KEY` is configured. If not configured, service returns safe fallback guidance.
+> Requires authenticated user.
 
-### POST `/api/v1/ai/reroute-suggest`
+### POST `/api/v1/ai/reroute`
 
-- **Auth:** Driver only
+- **Auth:** Any authenticated user
 - **Body:**
 
 ```json
 {
-  "route_id": "uuid",
-  "current_lat": 14.2116,
-  "current_lng": 121.1653,
-  "destination": "Parian Terminal",
-  "hazard_summary": "Optional short context"
+  "hazardZoneId": "uuid",
+  "userLat": 14.2116,
+  "userLng": 121.1653,
+  "currentRouteId": "uuid"
 }
 ```
 
@@ -604,33 +603,35 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 {
   "success": true,
   "data": {
-    "route_id": "uuid",
-    "route_code": "CAL-01",
-    "ai": {
-      "summary": "string",
-      "risk_level": "low",
-      "recommendations": ["string"],
-      "cautions": ["string"]
-    },
-    "generated_at": "2026-03-20T09:00:00.000Z"
-  }
+    "hazardZoneId": "uuid",
+    "suggestedRouteCode": "CAL-02",
+    "message": "Avoid Real Street. Switch to CAL-02 via National Hwy.",
+    "severity": "high",
+    "alternativeSteps": [
+      "Turn back to Crossing Terminal.",
+      "Board CAL-02 towards Bucal."
+    ],
+    "generatedAt": "2026-03-20T09:00:00.000Z"
+  },
+  "message": "Reroute suggestion generated"
 }
 ```
 
 ### POST `/api/v1/ai/travel-tips`
 
-- **Auth:** Commuter or Driver
+- **Auth:** Any authenticated user
 - **Body:**
 
 ```json
 {
-  "route_id": "uuid",
-  "travel_time": "6:30 PM",
-  "objective": "balanced"
+  "originLat": 14.2116,
+  "originLng": 121.1653,
+  "destinationLabel": "SM City Calamba",
+  "role": "commuter"
 }
 ```
 
-`objective` can be: `fastest`, `least_crowded`, `safer`, `balanced`
+`role` can be: `commuter`, `driver`, `private_driver`, `citizen`, `guide`
 
 **Response 200**
 
@@ -638,16 +639,51 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 {
   "success": true,
   "data": {
-    "route_id": "uuid",
-    "route_code": "CAL-01",
-    "ai": {
-      "summary": "string",
-      "best_times": ["string"],
-      "avoid_times": ["string"],
-      "tips": ["string"]
-    },
-    "generated_at": "2026-03-20T09:00:00.000Z"
-  }
+    "tips": [
+      "Board CAL-06 at Crossing Terminal.",
+      "Alight at SM City Calamba entrance.",
+      "Travel time is around 15–20 minutes."
+    ],
+    "recommendedRouteCode": "CAL-06",
+    "fareEstimate": "PHP 13–15",
+    "bestTimeToTravel": "Before 8:00 AM",
+    "generatedAt": "2026-03-20T09:00:00.000Z"
+  },
+  "message": "Travel tips generated"
+}
+```
+
+### POST `/api/v1/ai/analyze-hazard`
+
+- **Auth:** Any authenticated user
+- **Body:**
+
+```json
+{
+  "imageBase64": "base64encodedimagestring",
+  "mimeType": "image/jpeg",
+  "lat": 14.2116,
+  "lng": 121.1653,
+  "reporterNote": "Malaking lubak sa gitna ng kalsada."
+}
+```
+
+`mimeType` can be: `image/jpeg`, `image/png`, `image/webp`
+
+**Response 200**
+
+```json
+{
+  "success": true,
+  "data": {
+    "severity": "high",
+    "hazardType": "pothole",
+    "description": "A large pothole approximately 50cm wide is visible in the center lane.",
+    "recommendedAction": "Avoid the center lane and reduce speed to below 20 kph.",
+    "confidence": 0.91,
+    "generatedAt": "2026-03-20T09:00:00.000Z"
+  },
+  "message": "Hazard analysis complete"
 }
 ```
 
@@ -655,8 +691,7 @@ Endpoints guarded with `adminMiddleware` require `is_admin: true` in token paylo
 
 - `400` validation error
 - `401` unauthorized
-- `403` forbidden role
-- `404` route not found/inactive (reroute)
+- `500` AI/service failure
 
 ---
 

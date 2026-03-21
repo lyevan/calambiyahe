@@ -1,12 +1,10 @@
-﻿import {
-  GoogleGenAI,
-  HarmCategory,
-  HarmBlockThreshold,
-  Part,
-} from '@google/genai';
-
-import { aiRepository } from './ai.repository';
-import { RerouteInput, TravelTipsInput, HazardAnalysisInput } from './ai.validation';
+﻿import { aiRepository } from "./ai.repository";
+import { geminiClient } from "../../lib/gemini.client";
+import {
+  RerouteInput,
+  TravelTipsInput,
+  HazardAnalysisInput,
+} from "./ai.validation";
 import {
   RerouteSuggestionDTO,
   TravelTipsDTO,
@@ -15,18 +13,7 @@ import {
   GeminiRerouteRaw,
   GeminiTravelTipsRaw,
   GeminiHazardAnalysisRaw,
-} from './ai.types';
-
-// â”€â”€â”€ Gemini Client Setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
-// SAFETY_SETTINGS removed for @google/genai compatibility
-
-// textModel initialization handled inline
-
-// visionModel initialization handled inline
+} from "./ai.types";
 
 // â”€â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -37,8 +24,8 @@ const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 function parseGeminiJson<T>(raw: string): T | null {
   try {
     const clean = raw
-      .replace(/```json\s*/gi, '')
-      .replace(/```\s*/gi, '')
+      .replace(/```json\s*/gi, "")
+      .replace(/```\s*/gi, "")
       .trim();
     return JSON.parse(clean) as T;
   } catch {
@@ -55,7 +42,9 @@ export const aiService = {
    * Fetches hazard zone + all available Calamba routes, then asks Gemini
    * to suggest an alternative route for a driver approaching the hazard.
    */
-  async getRerouteSuggestion(input: RerouteInput): Promise<RerouteSuggestionDTO> {
+  async getRerouteSuggestion(
+    input: RerouteInput,
+  ): Promise<RerouteSuggestionDTO> {
     // 1. Gather context from DB
     const [hazardZone, currentRoute, allRoutes] = await Promise.all([
       aiRepository.getHazardZoneById(input.hazardZoneId),
@@ -70,14 +59,23 @@ export const aiService = {
     const routeList = allRoutes
       .map(
         (r) =>
-          `- ${r.routeCode}: ${r.fromTerminal} â†’ ${r.toTerminal}` +
-          (r.keyStops.length > 0 ? ` (via ${r.keyStops.join(', ')})` : ''),
+          `- ${r.routeCode}` +
+          (r.fromTerminal && r.toTerminal
+            ? `: ${r.fromTerminal} â†’ ${r.toTerminal}`
+            : "") +
+          (r.keyStops && r.keyStops.length > 0
+            ? ` (via ${r.keyStops.join(", ")})`
+            : ""),
       )
-      .join('\n');
+      .join("\n");
 
     const currentRouteLabel = currentRoute
-      ? `${currentRoute.routeCode} â€” ${currentRoute.fromTerminal} â†’ ${currentRoute.toTerminal}`
-      : 'Unknown';
+      ? `${currentRoute.routeCode}${
+          currentRoute.fromTerminal && currentRoute.toTerminal
+            ? ` â€” ${currentRoute.fromTerminal} â†’ ${currentRoute.toTerminal}`
+            : ""
+        }`
+      : "Unknown";
 
     // 2. Build Gemini prompt
     const prompt = `You are CalamBiyahe, a road safety and transport assistant for Calamba City, Laguna, Philippines.
@@ -106,16 +104,15 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 }`;
 
     // 3. Call Gemini
-    const result = await genAI.models.generateContent({ model: "gemini-1.5-flash", contents: prompt });
-    const rawText = (result.text || "").trim();
+    const rawText = await geminiClient.generateText(prompt);
 
     const parsed = parseGeminiJson<GeminiRerouteRaw>(rawText);
 
     // 4. Fallback if JSON parse fails
     const suggestion: GeminiRerouteRaw = parsed ?? {
       suggestedRouteCode: null,
-      message: rawText || 'Mag-ingat sa harap. Mabagal na magmaneho.',
-      alternativeSteps: ['Proceed with caution through the hazard zone.'],
+      message: rawText || "Mag-ingat sa harap. Mabagal na magmaneho.",
+      alternativeSteps: ["Proceed with caution through the hazard zone."],
     };
 
     return {
@@ -144,24 +141,29 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
     const terminalList =
       nearbyTerminals.length > 0
         ? nearbyTerminals
-            .map((t) => `- ${t.name} (routes: ${t.routeCodes.join(', ')})`)
-            .join('\n')
-        : '- No terminals within 2 km. User may need to walk to a stop.';
+            .map((t) => `- ${t.name} (routes: ${t.routeCodes.join(", ")})`)
+            .join("\n")
+        : "- No terminals within 2 km. User may need to walk to a stop.";
 
     const routeList = allRoutes
       .map(
         (r) =>
-          `- ${r.routeCode}: ${r.fromTerminal} â†’ ${r.toTerminal}` +
-          (r.keyStops.length > 0 ? ` (via ${r.keyStops.join(', ')})` : ''),
+          `- ${r.routeCode}` +
+          (r.fromTerminal && r.toTerminal
+            ? `: ${r.fromTerminal} â†’ ${r.toTerminal}`
+            : "") +
+          (r.keyStops && r.keyStops.length > 0
+            ? ` (via ${r.keyStops.join(", ")})`
+            : ""),
       )
-      .join('\n');
+      .join("\n");
 
     const roleDescriptions: Record<typeof input.role, string> = {
-      commuter: 'a daily public transport commuter',
-      driver: 'a jeepney driver doing route planning',
-      private_driver: 'a private vehicle driver avoiding traffic',
-      citizen: 'a concerned citizen navigating the city',
-      guide: 'a local guide helping visitors get around Calamba City',
+      commuter: "a daily public transport commuter",
+      driver: "a jeepney driver doing route planning",
+      private_driver: "a private vehicle driver avoiding traffic",
+      citizen: "a concerned citizen navigating the city",
+      guide: "a local guide helping visitors get around Calamba City",
     };
 
     // 2. Build Gemini prompt
@@ -189,13 +191,12 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 }`;
 
     // 3. Call Gemini
-    const result = await genAI.models.generateContent({ model: "gemini-1.5-flash", contents: prompt });
-    const rawText = (result.text || "").trim();
+    const rawText = await geminiClient.generateText(prompt);
 
     const parsed = parseGeminiJson<GeminiTravelTipsRaw>(rawText);
 
     const tips: GeminiTravelTipsRaw = parsed ?? {
-      tips: [rawText || 'Check with locals for the best jeepney to take.'],
+      tips: [rawText || "Check with locals for the best jeepney to take."],
       recommendedRouteCode: null,
       fareEstimate: null,
       bestTimeToTravel: null,
@@ -216,20 +217,14 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
    * Sends a base64 road photo to Gemini Vision for hazard classification.
    * Returns severity, hazard type, description, and recommended action.
    */
-  async analyzeHazardPhoto(input: HazardAnalysisInput): Promise<HazardAnalysisDTO> {
-    // 1. Build multimodal parts
-    const imagePart: Part = {
-      inlineData: {
-        data: input.imageBase64,
-        mimeType: input.mimeType,
-      },
-    };
-
+  async analyzeHazardPhoto(
+    input: HazardAnalysisInput,
+  ): Promise<HazardAnalysisDTO> {
     const prompt = `You are CalamBiyahe's road hazard detection system for Calamba City, Laguna, Philippines.
 
 Analyze this road photograph and identify any road hazards present.
 Photo location: (${input.lat}, ${input.lng}) â€” within Calamba City.
-${input.reporterNote ? `Reporter's note: "${input.reporterNote}"` : ''}
+${input.reporterNote ? `Reporter's note: "${input.reporterNote}"` : ""}
 
 Severity scale:
 - low: Minor surface wear, hairline cracks, minimal road impact
@@ -247,16 +242,20 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 }`;
 
     // 2. Call Gemini Vision
-    const result = await genAI.models.generateContent({ model: "gemini-1.5-pro", contents: [prompt, imagePart] });
-    const rawText = (result.text || "").trim();
+    const rawText = await geminiClient.generateVisionText(
+      prompt,
+      input.imageBase64,
+      input.mimeType,
+    );
 
     const parsed = parseGeminiJson<GeminiHazardAnalysisRaw>(rawText);
 
     const analysis: GeminiHazardAnalysisRaw = parsed ?? {
-      severity: 'medium',
-      hazardType: 'unknown',
-      description: 'Unable to fully parse hazard from image. Manual review recommended.',
-      recommendedAction: 'Proceed with caution and reduce speed.',
+      severity: "medium",
+      hazardType: "unknown",
+      description:
+        "Unable to fully parse hazard from image. Manual review recommended.",
+      recommendedAction: "Proceed with caution and reduce speed.",
       confidence: 0.4,
     };
 

@@ -1054,10 +1054,10 @@
         }
       }
     },
-    "/api/v1/ai/reroute-suggest": {
+    "/api/v1/ai/reroute": {
       "post": {
         "tags": ["AI"],
-        "summary": "Driver reroute suggestion via Gemini",
+        "summary": "Generate reroute suggestion",
         "security": [
           {
             "bearerAuth": []
@@ -1071,7 +1071,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RerouteSuggestRequest"
+                "$ref": "#/components/schemas/AIRerouteRequest"
               }
             }
           }
@@ -1093,9 +1093,6 @@
           "401": {
             "$ref": "#/components/responses/Error401"
           },
-          "403": {
-            "$ref": "#/components/responses/Error403"
-          },
           "404": {
             "$ref": "#/components/responses/Error404"
           }
@@ -1105,7 +1102,7 @@
     "/api/v1/ai/travel-tips": {
       "post": {
         "tags": ["AI"],
-        "summary": "Commuter or driver travel tips via Gemini",
+        "summary": "Generate travel tips",
         "security": [
           {
             "bearerAuth": []
@@ -1119,7 +1116,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TravelTipsRequest"
+                "$ref": "#/components/schemas/AITravelTipsRequest"
               }
             }
           }
@@ -1140,9 +1137,48 @@
           },
           "401": {
             "$ref": "#/components/responses/Error401"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/analyze-hazard": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Analyze hazard photo with Gemini Vision",
+        "security": [
+          {
+            "bearerAuth": []
           },
-          "403": {
-            "$ref": "#/components/responses/Error403"
+          {
+            "cookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIHazardAnalysisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hazard analysis generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIHazardAnalysisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
           }
         }
       }
@@ -2454,88 +2490,107 @@
           }
         }
       },
-      "RerouteSuggestRequest": {
+      "AIRerouteRequest": {
         "type": "object",
-        "required": ["route_id"],
+        "required": ["hazardZoneId", "userLat", "userLng", "currentRouteId"],
         "properties": {
-          "route_id": {
+          "hazardZoneId": {
             "type": "string",
             "format": "uuid"
           },
-          "current_lat": {
-            "type": "number"
+          "userLat": {
+            "type": "number",
+            "minimum": 14.18,
+            "maximum": 14.25
           },
-          "current_lng": {
-            "type": "number"
+          "userLng": {
+            "type": "number",
+            "minimum": 121.1,
+            "maximum": 121.18
           },
-          "destination": {
-            "type": "string"
-          },
-          "hazard_summary": {
-            "type": "string"
-          }
-        }
-      },
-      "TravelTipsRequest": {
-        "type": "object",
-        "properties": {
-          "route_id": {
+          "currentRouteId": {
             "type": "string",
             "format": "uuid"
-          },
-          "travel_time": {
-            "type": "string"
-          },
-          "current_lat": {
-            "type": "number"
-          },
-          "current_lng": {
-            "type": "number"
-          },
-          "objective": {
-            "type": "string",
-            "enum": ["fastest", "least_crowded", "safer", "balanced"]
           }
         }
       },
-      "AIReroutePayload": {
+      "AITravelTipsRequest": {
         "type": "object",
+        "required": ["originLat", "originLng", "destinationLabel", "role"],
         "properties": {
-          "summary": {
+          "originLat": {
+            "type": "number",
+            "minimum": 14.18,
+            "maximum": 14.25
+          },
+          "originLng": {
+            "type": "number",
+            "minimum": 121.1,
+            "maximum": 121.18
+          },
+          "destinationLabel": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "role": {
+            "type": "string",
+            "enum": ["commuter", "driver", "private_driver", "citizen", "guide"]
+          }
+        }
+      },
+      "AIHazardAnalysisRequest": {
+        "type": "object",
+        "required": ["imageBase64", "mimeType", "lat", "lng"],
+        "properties": {
+          "imageBase64": {
             "type": "string"
           },
-          "risk_level": {
+          "mimeType": {
             "type": "string",
-            "enum": ["low", "medium", "high"]
+            "enum": ["image/jpeg", "image/png", "image/webp"]
           },
-          "recommendations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "lat": {
+            "type": "number",
+            "minimum": 14.18,
+            "maximum": 14.25
           },
-          "cautions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "lng": {
+            "type": "number",
+            "minimum": 121.1,
+            "maximum": 121.18
+          },
+          "reporterNote": {
+            "type": "string",
+            "maxLength": 500
           }
         }
       },
       "AIRerouteData": {
         "type": "object",
         "properties": {
-          "route_id": {
+          "hazardZoneId": {
             "type": "string",
             "format": "uuid"
           },
-          "route_code": {
+          "suggestedRouteCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
             "type": "string"
           },
-          "ai": {
-            "$ref": "#/components/schemas/AIReroutePayload"
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
           },
-          "generated_at": {
+          "alternativeSteps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generatedAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -2550,51 +2605,34 @@
           },
           "data": {
             "$ref": "#/components/schemas/AIRerouteData"
-          }
-        }
-      },
-      "AITravelTipsPayload": {
-        "type": "object",
-        "properties": {
-          "summary": {
+          },
+          "message": {
             "type": "string"
-          },
-          "best_times": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "avoid_times": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "tips": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
       "AITravelTipsData": {
         "type": "object",
         "properties": {
-          "route_id": {
+          "tips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "recommendedRouteCode": {
             "type": "string",
-            "format": "uuid",
             "nullable": true
           },
-          "route_code": {
+          "fareEstimate": {
             "type": "string",
             "nullable": true
           },
-          "ai": {
-            "$ref": "#/components/schemas/AITravelTipsPayload"
+          "bestTimeToTravel": {
+            "type": "string",
+            "nullable": true
           },
-          "generated_at": {
+          "generatedAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -2609,6 +2647,51 @@
           },
           "data": {
             "$ref": "#/components/schemas/AITravelTipsData"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AIHazardAnalysisData": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "hazardType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "recommendedAction": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AIHazardAnalysisResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AIHazardAnalysisData"
+          },
+          "message": {
+            "type": "string"
           }
         }
       },

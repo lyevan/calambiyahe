@@ -1,4 +1,5 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
+import * as FileSystem from "expo-file-system";
 
 // ─── AI API Types (Mobile-side mirror of API DTOs) ────────────────────────────
 
@@ -13,7 +14,7 @@ export interface RerouteSuggestion {
   hazardZoneId: string;
   suggestedRouteCode: string | null;
   message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   alternativeSteps: string[];
   generatedAt: string;
 }
@@ -22,7 +23,7 @@ export interface TravelTipsRequest {
   originLat: number;
   originLng: number;
   destinationLabel: string;
-  role: 'commuter' | 'driver' | 'private_driver' | 'citizen' | 'guide';
+  role: "commuter" | "driver" | "private_driver" | "citizen" | "guide";
 }
 
 export interface TravelTips {
@@ -35,14 +36,14 @@ export interface TravelTips {
 
 export interface HazardAnalysisRequest {
   imageBase64: string;
-  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  mimeType: "image/jpeg" | "image/png" | "image/webp";
   lat: number;
   lng: number;
   reporterNote?: string;
 }
 
 export interface HazardAnalysis {
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   hazardType: string;
   description: string;
   recommendedAction: string;
@@ -59,10 +60,10 @@ export interface HazardAnalysis {
 export async function fetchRerouteSuggestion(
   payload: RerouteRequest,
 ): Promise<RerouteSuggestion> {
-  const { data } = await apiClient.post<{ success: boolean; data: RerouteSuggestion }>(
-    '/ai/reroute',
-    payload,
-  );
+  const { data } = await apiClient.post<{
+    success: boolean;
+    data: RerouteSuggestion;
+  }>("/ai/reroute", payload);
   return data.data;
 }
 
@@ -70,9 +71,11 @@ export async function fetchRerouteSuggestion(
  * Fetch AI-generated travel tips for a Calamba City destination.
  * Used by: commuter guide screen, local guide directions screen.
  */
-export async function fetchTravelTips(payload: TravelTipsRequest): Promise<TravelTips> {
+export async function fetchTravelTips(
+  payload: TravelTipsRequest,
+): Promise<TravelTips> {
   const { data } = await apiClient.post<{ success: boolean; data: TravelTips }>(
-    '/ai/travel-tips',
+    "/ai/travel-tips",
     payload,
   );
   return data.data;
@@ -90,35 +93,29 @@ export async function fetchTravelTips(payload: TravelTipsRequest): Promise<Trave
  */
 export async function analyzeHazardPhoto(
   imageUri: string,
-  mimeType: 'image/jpeg' | 'image/png' | 'image/webp',
+  mimeType: "image/jpeg" | "image/png" | "image/webp",
   lat: number,
   lng: number,
   note?: string,
 ): Promise<HazardAnalysis> {
-  // Convert local file URI → base64 string
-  const response = await fetch(imageUri);
-  const blob = await response.blob();
-  const base64 = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      // Strip the data URL prefix ("data:image/jpeg;base64,")
-      resolve(result.split(',')[1] ?? '');
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+  const base64 = await FileSystem.readAsStringAsync(imageUri, {
+    encoding: FileSystem.EncodingType.Base64,
   });
 
-  const { data } = await apiClient.post<{ success: boolean; data: HazardAnalysis }>(
-    '/ai/analyze-hazard',
-    {
-      imageBase64: base64,
-      mimeType,
-      lat,
-      lng,
-      reporterNote: note,
-    } satisfies HazardAnalysisRequest,
-  );
+  if (!base64 || !base64.trim()) {
+    throw new Error("Failed to read image as base64 from imageUri");
+  }
+
+  const { data } = await apiClient.post<{
+    success: boolean;
+    data: HazardAnalysis;
+  }>("/ai/analyze-hazard", {
+    imageBase64: base64,
+    mimeType,
+    lat,
+    lng,
+    reporterNote: note,
+  } satisfies HazardAnalysisRequest);
 
   return data.data;
 }

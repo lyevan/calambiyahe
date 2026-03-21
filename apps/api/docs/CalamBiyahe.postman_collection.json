@@ -617,7 +617,7 @@
       "name": "AI",
       "item": [
         {
-          "name": "POST /api/v1/ai/reroute-suggest",
+          "name": "POST /api/v1/ai/reroute",
           "request": {
             "method": "POST",
             "auth": {
@@ -638,9 +638,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"route_id\": \"{{routeId}}\",\n  \"current_lat\": 14.2116,\n  \"current_lng\": 121.1653,\n  \"destination\": \"Parian Terminal\",\n  \"hazard_summary\": \"Optional short context\"\n}"
+              "raw": "{\n  \"hazardZoneId\": \"{{hazardZoneId}}\",\n  \"userLat\": 14.2116,\n  \"userLng\": 121.1653,\n  \"currentRouteId\": \"{{routeId}}\"\n}"
             },
-            "url": "{{apiV1}}/ai/reroute-suggest"
+            "url": "{{apiV1}}/ai/reroute"
           }
         },
         {
@@ -665,9 +665,36 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"route_id\": \"{{routeId}}\",\n  \"travel_time\": \"6:30 PM\",\n  \"objective\": \"balanced\"\n}"
+              "raw": "{\n  \"originLat\": 14.2116,\n  \"originLng\": 121.1653,\n  \"destinationLabel\": \"SM City Calamba\",\n  \"role\": \"commuter\"\n}"
             },
             "url": "{{apiV1}}/ai/travel-tips"
+          }
+        },
+        {
+          "name": "POST /api/v1/ai/analyze-hazard",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"<base64_image_data>\",\n  \"mimeType\": \"image/jpeg\",\n  \"lat\": 14.2116,\n  \"lng\": 121.1653,\n  \"reporterNote\": \"Malaking lubak sa gitna ng kalsada.\"\n}"
+            },
+            "url": "{{apiV1}}/ai/analyze-hazard"
           }
         }
       ]

@@ -1,13 +1,13 @@
 // ─── Domain Types ────────────────────────────────────────────────────────────
 
 export type UserRole =
-  | 'commuter'
-  | 'driver'
-  | 'private_driver'
-  | 'citizen'
-  | 'guide';
+  | "commuter"
+  | "driver"
+  | "private_driver"
+  | "citizen"
+  | "guide";
 
-export type HazardSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type HazardSeverity = "low" | "medium" | "high" | "critical";
 
 // ─── Request DTOs ─────────────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ export interface TravelTipsRequestDTO {
 
 export interface HazardAnalysisRequestDTO {
   imageBase64: string;
-  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  mimeType: "image/jpeg" | "image/png" | "image/webp";
   lat: number;
   lng: number;
   reporterNote?: string;
@@ -70,15 +70,15 @@ export interface HazardZoneContext {
   endLat: number;
   endLng: number;
   hazardType: string;
-  severity: string;
-  roadName: string;
+  severity: HazardSeverity;
+  roadName: string | null;
 }
 
 export interface RouteContext {
   routeId: string;
   routeCode: string;
-  fromTerminal: string;
-  toTerminal: string;
+  fromTerminal: string | null;
+  toTerminal: string | null;
   keyStops: string[];
 }
 
