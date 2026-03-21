@@ -1,19 +1,19 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   fetchRerouteSuggestion,
   fetchTravelTips,
   analyzeHazardPhoto,
   RerouteRequest,
   TravelTipsRequest,
-} from '../api/ai.api';
+} from "../api/ai.api";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 // Matches conventions defined in agent rules section 4.4
 
 export const aiQueryKeys = {
-  reroute: (hazardZoneId: string) => ['ai', 'suggest', hazardZoneId] as const,
+  reroute: (hazardZoneId: string) => ["ai", "suggest", hazardZoneId] as const,
   travelTips: (originLat: number, originLng: number, destination: string) =>
-    ['ai', 'tips', originLat, originLng, destination] as const,
+    ["ai", "tips", originLat, originLng, destination] as const,
 };
 
 // ─── useRerouteSuggestion ─────────────────────────────────────────────────────
@@ -34,14 +34,14 @@ export const aiQueryKeys = {
  */
 export function useRerouteSuggestion(params: RerouteRequest | null) {
   return useQuery({
-    queryKey: aiQueryKeys.reroute(params?.hazardZoneId ?? ''),
+    queryKey: aiQueryKeys.reroute(params?.hazardZoneId ?? ""),
     queryFn: () => fetchRerouteSuggestion(params!),
     enabled:
       !!params &&
       !!params.hazardZoneId &&
       !!params.currentRouteId &&
-      !!params.userLat &&
-      !!params.userLng,
+      params.userLat != null &&
+      params.userLng != null,
     staleTime: 60 * 1000, // 60 seconds
     retry: 1,
   });
@@ -67,13 +67,13 @@ export function useTravelTips(params: TravelTipsRequest | null) {
     queryKey: aiQueryKeys.travelTips(
       params?.originLat ?? 0,
       params?.originLng ?? 0,
-      params?.destinationLabel ?? '',
+      params?.destinationLabel ?? "",
     ),
     queryFn: () => fetchTravelTips(params!),
     enabled:
       !!params &&
-      !!params.originLat &&
-      !!params.originLng &&
+      params.originLat != null &&
+      params.originLng != null &&
       !!params.destinationLabel &&
       !!params.role,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -108,7 +108,7 @@ export function useAnalyzeHazardPhoto() {
       note,
     }: {
       imageUri: string;
-      mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+      mimeType: "image/jpeg" | "image/png" | "image/webp";
       lat: number;
       lng: number;
       note?: string;
