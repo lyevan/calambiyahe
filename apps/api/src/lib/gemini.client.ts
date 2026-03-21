@@ -96,12 +96,17 @@ export const geminiClient = {
       ai.models.generateContent({
         model,
         contents: [
-          prompt,
           {
-            inlineData: {
-              data: imageBase64,
-              mimeType,
-            },
+            role: "user",
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  data: imageBase64,
+                  mimeType,
+                },
+              },
+            ],
           },
         ],
       }),

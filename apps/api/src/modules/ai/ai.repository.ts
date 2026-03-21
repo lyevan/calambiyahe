@@ -1,4 +1,4 @@
-﻿import { and, gte, lte, eq } from "drizzle-orm";
+﻿import { and, gte, lte, eq, inArray } from "drizzle-orm";
 import { db } from "../../db";
 import { potholeZones } from "../../db/schema/pothole_zones";
 import { hazardReports } from "../../db/schema/hazard_reports";
@@ -69,18 +69,15 @@ export const aiRepository = {
         isKeyStop: routeWaypoints.is_key_stop,
       })
       .from(routeWaypoints)
-      .where(eq(routeWaypoints.route_id, routeId));
+      .where(eq(routeWaypoints.route_id, routeId))
+      .orderBy(routeWaypoints.sequence);
 
-    const sortedWaypoints = waypointRows.sort(
-      (a, b) => a.sequence - b.sequence,
-    );
-    const labeledStops = sortedWaypoints
+    const labeledStops = waypointRows
       .filter((w) => w.label && (w.isKeyStop ?? false))
       .map((w) => w.label as string);
 
-    const firstLabel = sortedWaypoints.find((w) => w.label)?.label ?? null;
-    const lastLabel =
-      [...sortedWaypoints].reverse().find((w) => w.label)?.label ?? null;
+    const firstLabel = waypointRows.find((w) => w.label)?.label ?? null;
+    const lastLabel = [...waypointRows].reverse().find((w) => w.label)?.label ?? null;
 
     return {
       routeId: r.route_id,
@@ -110,20 +107,19 @@ export const aiRepository = {
         sequence: routeWaypoints.sequence,
         isKeyStop: routeWaypoints.is_key_stop,
       })
-      .from(routeWaypoints);
+      .from(routeWaypoints)
+      .where(inArray(routeWaypoints.route_id, routeIds))
+      .orderBy(routeWaypoints.route_id, routeWaypoints.sequence);
 
     const waypointsByRoute = new Map<string, typeof waypointRows>();
     for (const row of waypointRows) {
-      if (!routeIds.includes(row.routeId)) continue;
       const list = waypointsByRoute.get(row.routeId) ?? [];
       list.push(row);
       waypointsByRoute.set(row.routeId, list);
     }
 
     return routes.map((r) => {
-      const routeWaypointsForRoute = (
-        waypointsByRoute.get(r.route_id) ?? []
-      ).sort((a, b) => a.sequence - b.sequence);
+      const routeWaypointsForRoute = waypointsByRoute.get(r.route_id) ?? [];
 
       const keyStops = routeWaypointsForRoute
         .filter((w) => w.label && (w.isKeyStop ?? false))
