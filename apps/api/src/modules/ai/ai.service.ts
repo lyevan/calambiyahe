@@ -18,8 +18,43 @@ import {
   GeminiRouteRaw,
 } from "./ai.types";
 import { hazardsRepository } from "../hazards/hazards.repository";
+import { lookup } from "dns/promises";
+import { isIP } from "net";
 
 // â”€â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+function isPrivateOrLocalIP(ipAddr: string): boolean {
+  if (!ipAddr || ipAddr.length === 0) return true;
+  const parts = ipAddr.split('.');
+  if (parts.length === 4) {
+    const [p1, p2] = parts.map(Number);
+    if (
+      p1 === 10 ||
+      p1 === 127 ||
+      (p1 === 172 && p2 >= 16 && p2 <= 31) ||
+      (p1 === 192 && p2 === 168) ||
+      p1 === 0 ||
+      p1 === 169
+    ) {
+      return true;
+    }
+  } else if (ipAddr.includes(':')) {
+    const lower = ipAddr.toLowerCase();
+    if (
+      lower === '::1' ||
+      lower.startsWith('fd') ||
+      lower.startsWith('fc') ||
+      lower.startsWith('fe8') ||
+      lower.startsWith('fe9') ||
+      lower.startsWith('fea') ||
+      lower.startsWith('feb') ||
+      lower.startsWith('ff')
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Safely parse a Gemini text response as JSON.
@@ -43,16 +78,27 @@ function parseGeminiJson<T>(raw: string): T | null {
 async function urlToBase64(
   url: string,
 ): Promise<{ base64: string; mimeType: string }> {
-  const response = await fetch(url);
-  if (!response.ok)
-    throw new Error(`Failed to fetch image: ${response.statusText}`);
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const mimeType = response.headers.get("content-type") || "image/jpeg";
-  return {
-    base64: buffer.toString("base64"),
-    mimeType: mimeType as any,
-  };
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok)
+      throw new Error(`Failed to fetch image: ${response.statusText}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const mimeType = response.headers.get("content-type") || "image/jpeg";
+    return {
+      base64: buffer.toString("base64"),
+      mimeType: mimeType as any,
+    };
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      throw new Error(`Fetch timed out for URL: ${url}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // â”€â”€â”€ AI Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -249,9 +295,35 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
       }
 
       // Construct full URL if relative
-      let imageUrl = report.image_url.startsWith("http")
-        ? report.image_url
-        : `${process.env.BASE_URL || "http://localhost:3000"}${report.image_url}`;
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(
+          report.image_url.startsWith("http")
+            ? report.image_url
+            : `${process.env.BASE_URL || "http://localhost:3000"}${report.image_url}`
+        );
+      } catch {
+        throw new Error("Invalid image URL format.");
+      }
+
+      const allowedHosts = [
+        "res.cloudinary.com",
+        "localhost", // Allow localhost domain
+      ];
+      if (!allowedHosts.includes(parsedUrl.hostname) && !parsedUrl.hostname.endsWith(".cloudinary.com")) {
+        throw new Error(`Hostname ${parsedUrl.hostname} not allowed for image fetching.`);
+      }
+
+      try {
+        const lookupRes = await lookup(parsedUrl.hostname);
+        if (isPrivateOrLocalIP(lookupRes.address) && parsedUrl.hostname !== "localhost") {
+           throw new Error("Resolved IP is in a restricted range.");
+        }
+      } catch (err: any) {
+        throw new Error(`DNS resolution failed or IP restricted: ${err.message}`);
+      }
+
+      let imageUrl = parsedUrl.toString();
 
       // OPTIMIZATION: If it's a Cloudinary URL, request a smaller, optimized version
       if (imageUrl.includes("res.cloudinary.com")) {
@@ -330,8 +402,19 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 
       let osrmRes: any;
       try {
-        const response = await fetch(osrmUrl);
-        osrmRes = await response.json();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        try {
+          const response = await fetch(osrmUrl, { signal: controller.signal });
+          osrmRes = await response.json();
+        } catch (error: any) {
+          if (error.name === "AbortError") {
+            throw new Error(`OSRM fetch timed out`);
+          }
+          throw error;
+        } finally {
+          clearTimeout(timeoutId);
+        }
       } catch (err) {
         throw new Error(
           `OSRM fetch failed: ${err instanceof Error ? err.message : String(err)}`,

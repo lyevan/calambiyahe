@@ -10,6 +10,7 @@ import {
 import {
   useCreateRoute,
   useBulkUpdateWaypoints,
+  useDeleteRoute,
 } from "../../../hooks/api/use-routes";
 
 export default function AdminRouteCreateScreen() {
@@ -19,8 +20,9 @@ export default function AdminRouteCreateScreen() {
   const [polyline, setPolyline] = useState<string>("");
 
   const createRoute = useCreateRoute();
+  const deleteRoute = useDeleteRoute();
   const [pendingRouteId, setPendingRouteId] = useState<string | null>(null);
-  const bulkUpdate = useBulkUpdateWaypoints(pendingRouteId ?? "");
+  const bulkUpdate = useBulkUpdateWaypoints();
 
   const isSaving = createRoute.isPending || bulkUpdate.isPending;
 
@@ -36,19 +38,26 @@ export default function AdminRouteCreateScreen() {
     try {
       // Step 1: Create Route meta + Polyline
       const route = await createRoute.mutateAsync({ name, code, polyline });
+
+      try {
+        // Step 2: Save stops
+        await bulkUpdate.mutateAsync({
+          routeId: route.route_id,
+          waypoints: waypoints.map((w) => ({
+            sequence: w.sequence,
+            lat: w.lat,
+            lng: w.lng,
+            label: w.label,
+            is_key_stop: w.is_key_stop,
+          })),
+        });
+      } catch (bulkErr) {
+        // Compensating rollback
+        await deleteRoute.mutateAsync(route.route_id).catch(e => console.error("Rollback failed", e));
+        throw bulkErr;
+      }
+
       setPendingRouteId(route.route_id);
-
-      // Step 2: Save stops
-      await bulkUpdate.mutateAsync(
-        waypoints.map((w) => ({
-          sequence: w.sequence,
-          lat: w.lat,
-          lng: w.lng,
-          label: w.label,
-          is_key_stop: w.is_key_stop,
-        })),
-      );
-
       router.back();
     } catch (err: any) {
       Alert.alert("Save failed", err.message ?? "Something went wrong.");

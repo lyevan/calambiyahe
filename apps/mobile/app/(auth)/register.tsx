@@ -16,7 +16,7 @@ import { Button } from "../../components/ui/Button";
 import { AlertBanner } from "../../components/ui/AlertBanner";
 import { apiClient } from "../../lib/api/client";
 import { Role } from "../../stores/role.store";
-import { ChevronLeft } from "lucide-react-native";
+import { HackathonDisclaimer } from "../../components/modals/HackathonDisclaimer";
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
@@ -49,6 +49,7 @@ export default function RegisterScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      <HackathonDisclaimer />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"

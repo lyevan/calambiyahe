@@ -5,7 +5,7 @@
     "scheme": "calambiyahe",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/calambiyahe-logo.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/calambiyahe-logo.png",
@@ -13,20 +13,22 @@
       "backgroundColor": "#0AADA8"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.iskode.calambiyahe"
     },
     "android": {
+      "package": "com.iskode.calambiyahe",
       "adaptiveIcon": {
         "backgroundColor": "#0AADA8",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/calambiyahe-logo.png",
         "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "monochromeImage": "./assets/calambiyahe-logo.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "plugins": ["expo-router"],
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/calambiyahe-logo.png"
     }
   }
 }

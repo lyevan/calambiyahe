@@ -68,13 +68,13 @@ export function useUpdateRoute() {
   });
 }
 
-export function useBulkUpdateWaypoints(routeId: string) {
+export function useBulkUpdateWaypoints() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (waypoints: WaypointInput[]) =>
+    mutationFn: ({ routeId, waypoints }: { routeId: string; waypoints: WaypointInput[] }) =>
       routesApi.bulkUpdateWaypoints(routeId, waypoints),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routes", routeId] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["routes", variables.routeId] });
     },
   });
 }

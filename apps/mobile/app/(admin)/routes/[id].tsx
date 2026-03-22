@@ -23,7 +23,7 @@ export default function AdminRouteEditScreen() {
   const [polyline, setPolyline] = useState<string>("");
 
   const updateRoute = useUpdateRoute();
-  const bulkUpdate = useBulkUpdateWaypoints(id);
+  const bulkUpdate = useBulkUpdateWaypoints();
 
   const isSaving = updateRoute.isPending || bulkUpdate.isPending;
 
@@ -57,15 +57,16 @@ export default function AdminRouteEditScreen() {
       });
 
       // Step 2: Update stops
-      await bulkUpdate.mutateAsync(
-        waypoints.map((w) => ({
+      await bulkUpdate.mutateAsync({
+        routeId: id,
+        waypoints: waypoints.map((w) => ({
           sequence: w.sequence,
           lat: w.lat,
           lng: w.lng,
           label: w.label,
           is_key_stop: w.is_key_stop,
         })),
-      );
+      });
 
       router.back();
     } catch (err: any) {

@@ -10,19 +10,17 @@ const router = Router();
 router.get(
   "/all-spots",
   authMiddleware,
-  adminMiddleware,
   terminalsController.listAllWaitingSpots,
 );
 
-router.get("/", terminalsController.listTerminals);
-router.get("/:terminal_id", terminalsController.getTerminalDetail);
-
-router.post(
-  "/",
+router.get("/", authMiddleware, terminalsController.listTerminals);
+router.get(
+  "/:terminal_id",
   authMiddleware,
-
-  terminalsController.createTerminal,
+  terminalsController.getTerminalDetail,
 );
+
+router.post("/", authMiddleware, terminalsController.createTerminal);
 router.patch(
   "/:terminal_id",
   authMiddleware,
@@ -39,7 +37,6 @@ router.delete(
 router.post(
   "/:terminal_id/spots",
   authMiddleware,
-
   terminalsController.createWaitingSpot,
 );
 router.delete(
