@@ -9,11 +9,13 @@ export const routesRepository = {
   },
 
   async getAllRoutes(onlyActive = false) {
-    const query = db.select().from(jeepneyRoutes);
     if (onlyActive) {
-      return await query.where(eq(jeepneyRoutes.is_active, true));
+      return await db
+        .select()
+        .from(jeepneyRoutes)
+        .where(eq(jeepneyRoutes.is_active, true));
     }
-    return await query;
+    return await db.select().from(jeepneyRoutes);
   },
 
   async getRouteById(id: string) {

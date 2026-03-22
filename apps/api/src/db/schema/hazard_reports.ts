@@ -8,9 +8,10 @@ export const hazardReports = pgTable("hazard_reports", {
     .notNull(),
   type: text("type").notNull(), // 'pothole', 'flood', 'accident', 'roadblock'
   description: text("description"),
+  severity: text("severity").default("medium"), // 'low', 'medium', 'high', 'critical'
   lat: numeric("lat", { precision: 10, scale: 7 }).notNull(),
   lng: numeric("lng", { precision: 10, scale: 7 }).notNull(),
   image_url: text("image_url"),
-  status: text("status").default("pending"), // 'pending', 'verified', 'resolved'
+  status: text("status").default("pending"), // 'pending', 'confirmed', 'rejected'
   reported_at: timestamp("reported_at").defaultNow(),
 });

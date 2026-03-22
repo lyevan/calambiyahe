@@ -15,7 +15,7 @@ interface HeatmapResponse {
   generated_at: string;
 }
 
-const HEATMAP_CACHE_TTL_MS = 15_000;
+const HEATMAP_CACHE_TTL_MS = 5_000;
 const heatmapCache = new Map<
   string,
   { data: HeatmapResponse; expiresAt: number }
@@ -42,8 +42,8 @@ export const heatmapService = {
     const grid = new Map<string, { lat: number; lng: number; count: number }>();
 
     for (const signal of signals) {
-      const cellLat = Math.round(Number(signal.lat) * 200) / 200;
-      const cellLng = Math.round(Number(signal.lng) * 200) / 200;
+      const cellLat = Math.round(Number(signal.lat) * 2000) / 2000;
+      const cellLng = Math.round(Number(signal.lng) * 2000) / 2000;
       const key = `${cellLat}_${cellLng}`;
 
       const existing = grid.get(key) || {
@@ -56,12 +56,14 @@ export const heatmapService = {
 
     // 4. Calculate intensity
     const points = Array.from(grid.values());
-    const maxCount = Math.max(...points.map((p) => p.count), 1);
+    // Cap maxCount at 5 so that 1 person is 0.2 intensity, 
+    // and 5+ people are full RED intensity.
+    const maxCount = Math.max(...points.map((p) => p.count), 5);
 
     const heatmapPoints: HeatmapPoint[] = points.map((p) => ({
       lat: p.lat,
       lng: p.lng,
-      intensity: parseFloat((p.count / maxCount).toFixed(2)),
+      intensity: parseFloat(Math.min(1, p.count / maxCount).toFixed(2)),
       count: p.count,
     }));
 

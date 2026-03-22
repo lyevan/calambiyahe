@@ -1,4 +1,4 @@
-﻿import { and, gte, lte, eq, inArray } from "drizzle-orm";
+import { and, gte, lte, eq, inArray } from "drizzle-orm";
 import { db } from "../../db";
 import { potholeZones } from "../../db/schema/pothole_zones";
 import { hazardReports } from "../../db/schema/hazard_reports";
@@ -25,6 +25,7 @@ export const aiRepository = {
         endLat: potholeZones.end_lat,
         endLng: potholeZones.end_lng,
         hazardType: hazardReports.type,
+        severity: hazardReports.severity,
       })
       .from(potholeZones)
       .leftJoin(
@@ -44,8 +45,40 @@ export const aiRepository = {
       endLat: parseFloat(row.endLat),
       endLng: parseFloat(row.endLng),
       hazardType: row.hazardType ?? "unknown",
-      severity: "medium",
+      severity: (row.severity as any) || "medium",
       roadName: null,
+    };
+  },
+
+  /**
+   * Fetch a raw hazard report for rerouting context (if no zone is defined).
+   */
+  async getHazardReportById(reportId: string): Promise<HazardZoneContext | null> {
+    const rows = await db
+      .select({
+        reportId: hazardReports.report_id,
+        lat: hazardReports.lat,
+        lng: hazardReports.lng,
+        type: hazardReports.type,
+        severity: hazardReports.severity,
+        description: hazardReports.description,
+      })
+      .from(hazardReports)
+      .where(eq(hazardReports.report_id, reportId))
+      .limit(1);
+
+    if (!rows[0]) return null;
+    const r = rows[0];
+
+    return {
+      zoneId: r.reportId,
+      startLat: parseFloat(r.lat),
+      startLng: parseFloat(r.lng),
+      endLat: parseFloat(r.lat),
+      endLng: parseFloat(r.lng),
+      hazardType: r.type,
+      severity: (r.severity as any) || "medium",
+      roadName: r.description || "Reported Location",
     };
   },
 

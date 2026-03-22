@@ -24,3 +24,7 @@ export const createWaitingSpotSchema = z.object({
   lat: coordinate,
   lng: coordinate,
 });
+
+export const updateStatusSchema = z.object({
+  status: z.enum(["pending", "confirmed", "rejected"]),
+});

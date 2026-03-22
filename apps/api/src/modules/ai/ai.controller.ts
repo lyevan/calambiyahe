@@ -4,6 +4,7 @@ import {
   rerouteSchema,
   travelTipsSchema,
   hazardAnalysisSchema,
+  routeSchema,
 } from './ai.validation';
 
 // ─── AI Controller ────────────────────────────────────────────────────────────
@@ -86,6 +87,33 @@ export const aiController = {
         success: true,
         data: analysis,
         message: 'Hazard analysis complete',
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  /**
+   * POST /api/v1/ai/route
+   * Roles: driver, private_driver
+   * Returns AI-refined route and ETA based on current hazards.
+   */
+  async route(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const parsed = routeSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          success: false,
+          error: parsed.error.errors[0]?.message ?? 'Invalid request body',
+        });
+        return;
+      }
+
+      const routeResult = await aiService.getAiRoute(parsed.data);
+
+      res.status(200).json({
+        success: true,
+        data: routeResult,
+        message: 'AI route and ETA generated',
       });
     } catch (err) {
       next(err);

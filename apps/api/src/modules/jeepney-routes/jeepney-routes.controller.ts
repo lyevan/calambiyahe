@@ -28,7 +28,8 @@ export const routesController = {
 
   async getAllRoutes(req: Request, res: Response) {
     try {
-      const onlyActive = req.query.all !== "true";
+      const isAdminPath = req.baseUrl.includes("/admin");
+      const onlyActive = req.query.all !== "true" && !isAdminPath;
       const routes = await routesService.listRoutes(onlyActive);
       res.json({ success: true, data: routes });
     } catch (error) {

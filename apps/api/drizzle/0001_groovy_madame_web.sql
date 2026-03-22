@@ -1,0 +1,1 @@
+ALTER TABLE "jeepney_routes" ADD COLUMN "polyline" text;

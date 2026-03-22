@@ -8,7 +8,10 @@ export const hazardsRepository = {
     return result[0];
   },
 
-  async getAllReports() {
+  async getAllReports(statusFilter?: string) {
+    if (statusFilter && statusFilter !== "all") {
+      return await db.select().from(hazardReports).where(eq(hazardReports.status, statusFilter));
+    }
     return await db.select().from(hazardReports);
   },
 
@@ -37,5 +40,11 @@ export const hazardsRepository = {
 
   async getPotholeZones() {
     return await db.select().from(potholeZones);
+  },
+  async deleteReport(id: string) {
+    return await db
+      .delete(hazardReports)
+      .where(eq(hazardReports.report_id, id))
+      .returning();
   },
 };

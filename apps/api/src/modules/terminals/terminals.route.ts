@@ -7,15 +7,20 @@ import {
 
 const router = Router();
 
-router.get("/", terminalsController.listTerminals);
-router.get("/:terminal_id", terminalsController.getTerminalDetail);
-
-router.post(
-  "/",
+router.get(
+  "/all-spots",
   authMiddleware,
-  adminMiddleware,
-  terminalsController.createTerminal,
+  terminalsController.listAllWaitingSpots,
 );
+
+router.get("/", authMiddleware, terminalsController.listTerminals);
+router.get(
+  "/:terminal_id",
+  authMiddleware,
+  terminalsController.getTerminalDetail,
+);
+
+router.post("/", authMiddleware, terminalsController.createTerminal);
 router.patch(
   "/:terminal_id",
   authMiddleware,
@@ -32,7 +37,6 @@ router.delete(
 router.post(
   "/:terminal_id/spots",
   authMiddleware,
-  adminMiddleware,
   terminalsController.createWaitingSpot,
 );
 router.delete(
@@ -40,6 +44,20 @@ router.delete(
   authMiddleware,
   adminMiddleware,
   terminalsController.deleteWaitingSpot,
+);
+
+router.patch(
+  "/:terminal_id/status",
+  authMiddleware,
+  adminMiddleware,
+  terminalsController.updateTerminalStatus,
+);
+
+router.patch(
+  "/spots/:spot_id/status",
+  authMiddleware,
+  adminMiddleware,
+  terminalsController.updateWaitingSpotStatus,
 );
 
 export default router;
