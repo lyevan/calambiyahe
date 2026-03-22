@@ -15,8 +15,8 @@ export const hazardsService = {
     });
   },
 
-  async listHazards() {
-    return await hazardsRepository.getAllReports();
+  async listHazards(statusFilter: string = "confirmed") {
+    return await hazardsRepository.getAllReports(statusFilter);
   },
 
   async updateStatus(id: string, status: string) {
@@ -35,5 +35,8 @@ export const hazardsService = {
 
   async listPotholeZones() {
     return await hazardsRepository.getPotholeZones();
+  },
+  async deleteHazard(id: string) {
+    return await hazardsRepository.deleteReport(id);
   },
 };

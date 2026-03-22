@@ -6,16 +6,7 @@ import { authMiddleware, adminMiddleware } from "../../middleware/auth.middlewar
 
 const router = Router();
 
-// Configure multer for image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+import { storage } from "../../lib/cloudinary";
 
 const upload = multer({ storage });
 
@@ -29,5 +20,6 @@ router.post("/", authMiddleware, upload.single("image"), hazardsController.repor
 // Admin routes
 router.patch("/:id/status", authMiddleware, adminMiddleware, hazardsController.updateStatus);
 router.post("/:id/zone", authMiddleware, adminMiddleware, hazardsController.addPotholeZone);
+router.delete("/:id", authMiddleware, adminMiddleware, hazardsController.deleteHazard);
 
 export default router;

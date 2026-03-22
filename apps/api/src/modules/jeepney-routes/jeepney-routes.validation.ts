@@ -3,11 +3,13 @@ import { z } from "zod";
 export const createRouteSchema = z.object({
   name: z.string().min(3),
   code: z.string().regex(/^CAL-\d{2}$/),
+  polyline: z.string().optional(),
 });
 
 export const updateRouteSchema = z.object({
   name: z.string().min(3).optional(),
   is_active: z.boolean().optional(),
+  polyline: z.string().optional(),
 });
 
 export const waypointSchema = z.object({

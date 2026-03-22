@@ -39,13 +39,24 @@ export const travelTipsSchema = z.object({
 // ─── POST /api/v1/ai/analyze-hazard ──────────────────────────────────────────
 
 export const hazardAnalysisSchema = z.object({
-  imageBase64: z.string().min(1, 'imageBase64 is required'),
-  mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp'], {
-    errorMap: () => ({ message: 'mimeType must be image/jpeg, image/png, or image/webp' }),
-  }),
+  imageBase64: z.string().optional(),
+  mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp']).optional(),
   lat: calambaLat,
   lng: calambaLng,
   reporterNote: z.string().max(500, 'Reporter note must not exceed 500 characters').optional(),
+  reportId: z.string().uuid().optional(),
+}).refine(data => data.imageBase64 || data.reportId, {
+  message: "Either imageBase64 or reportId must be provided",
+  path: ["imageBase64"],
+});
+
+// ─── POST /api/v1/ai/route ────────────────────────────────────────────────────
+
+export const routeSchema = z.object({
+  originLat: calambaLat,
+  originLng: calambaLng,
+  destLat: calambaLat,
+  destLng: calambaLng,
 });
 
 // ─── Inferred Input Types ─────────────────────────────────────────────────────
@@ -53,3 +64,4 @@ export const hazardAnalysisSchema = z.object({
 export type RerouteInput = z.infer<typeof rerouteSchema>;
 export type TravelTipsInput = z.infer<typeof travelTipsSchema>;
 export type HazardAnalysisInput = z.infer<typeof hazardAnalysisSchema>;
+export type RouteInput = z.infer<typeof routeSchema>;

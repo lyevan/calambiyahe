@@ -31,6 +31,14 @@ export interface HazardAnalysisRequestDTO {
   lat: number;
   lng: number;
   reporterNote?: string;
+  reportId?: string;
+}
+
+export interface RouteRequestDTO {
+  originLat: number;
+  originLng: number;
+  destLat: number;
+  destLng: number;
 }
 
 // ─── Response DTOs ────────────────────────────────────────────────────────────
@@ -58,6 +66,20 @@ export interface HazardAnalysisDTO {
   description: string;
   recommendedAction: string;
   confidence: number;
+  generatedAt: string;
+}
+
+export interface RouteResponseDTO {
+  routes: {
+    distance: number;
+    duration: number; // refined by AI
+    geometry: {
+      type: "LineString";
+      coordinates: [number, number][];
+    };
+    message: string;
+    hazardsEncountered: number;
+  }[];
   generatedAt: string;
 }
 
@@ -112,4 +134,12 @@ export interface GeminiHazardAnalysisRaw {
   description: string;
   recommendedAction: string;
   confidence: number;
+}
+
+export interface GeminiRouteRaw {
+  refinedRoutes: {
+    refinedDuration: number; // in seconds
+    message: string;
+    hazardsEncountered: number;
+  }[];
 }

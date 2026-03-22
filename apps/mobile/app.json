@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "calambiyahe",
+    "slug": "calambiyahe",
+    "scheme": "calambiyahe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/calambiyahe-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0AADA8"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0AADA8",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router"],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

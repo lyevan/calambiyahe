@@ -7,6 +7,7 @@ export const terminals = pgTable("terminals", {
   lat: numeric("lat", { precision: 10, scale: 7 }).notNull(),
   lng: numeric("lng", { precision: 10, scale: 7 }).notNull(),
   address: text("address"),
+  status: text("status").default("pending"), // 'pending', 'confirmed', 'rejected'
   created_by: uuid("created_by").references(() => users.user_id),
   created_at: timestamp("created_at").defaultNow(),
 });

@@ -4,7 +4,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
 const GEMINI_TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || GEMINI_MODEL;
 const GEMINI_VISION_MODEL = process.env.GEMINI_VISION_MODEL || "gemini-1.5-pro";
-const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 15000);
+const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 30000);
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -55,12 +55,14 @@ export const geminiClient = {
       GEMINI_TIMEOUT_MS,
     );
 
-    // The new SDK accesses the text directly on the result object
-    if (!result.text) {
+    // Casting to any to access .text safely as SDK behavior varies across wrappers/versions
+    const text = (result as any).text;
+
+    if (!text) {
       throw new Error("Received empty response from Gemini");
     }
 
-    return JSON.parse(result.text) as T;
+    return JSON.parse(text) as T;
   },
 
   async generateText(
@@ -79,7 +81,7 @@ export const geminiClient = {
       GEMINI_TIMEOUT_MS,
     );
 
-    return (result.text || "").trim();
+    return ((result as any).text || "").trim();
   },
 
   async generateVisionText(
@@ -113,6 +115,6 @@ export const geminiClient = {
       GEMINI_TIMEOUT_MS,
     );
 
-    return (result.text || "").trim();
+    return ((result as any).text || "").trim();
   },
 };

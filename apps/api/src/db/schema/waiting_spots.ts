@@ -20,6 +20,7 @@ export const waitingSpots = pgTable("waiting_spots", {
   label: text("label").notNull(),
   lat: numeric("lat", { precision: 10, scale: 7 }).notNull(),
   lng: numeric("lng", { precision: 10, scale: 7 }).notNull(),
+  status: text("status").default("pending"), // 'pending', 'confirmed', 'rejected'
   is_active: boolean("is_active").default(true),
   created_at: timestamp("created_at").defaultNow(),
 });

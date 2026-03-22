@@ -8,7 +8,7 @@ export const hazardsController = {
       const validatedData = createHazardSchema.parse(req.body);
       
       // Handle image upload if present
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const imageUrl = req.file ? req.file.path : null;
       
       const report = await hazardsService.reportHazard(req.user!.user_id, {
         ...validatedData,
@@ -23,7 +23,8 @@ export const hazardsController = {
 
   async getHazards(req: Request, res: Response) {
     try {
-      const hazards = await hazardsService.listHazards();
+      const status = req.query.status as string | undefined;
+      const hazards = await hazardsService.listHazards(status);
       res.json({ success: true, data: hazards });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -56,6 +57,14 @@ export const hazardsController = {
       res.json({ success: true, data: zones });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
+    }
+  },
+  async deleteHazard(req: Request, res: Response) {
+    try {
+      await hazardsService.deleteHazard(req.params.id);
+      res.json({ success: true, message: "Hazard deleted successfully" });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
     }
   },
 };

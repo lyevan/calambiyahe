@@ -1,9 +1,10 @@
-﻿import { aiRepository } from "./ai.repository";
+import { aiRepository } from "./ai.repository";
 import { geminiClient } from "../../lib/gemini.client";
 import {
   RerouteInput,
   TravelTipsInput,
   HazardAnalysisInput,
+  RouteInput,
 } from "./ai.validation";
 import {
   RerouteSuggestionDTO,
@@ -13,7 +14,10 @@ import {
   GeminiRerouteRaw,
   GeminiTravelTipsRaw,
   GeminiHazardAnalysisRaw,
+  RouteResponseDTO,
+  GeminiRouteRaw,
 } from "./ai.types";
+import { hazardsRepository } from "../hazards/hazards.repository";
 
 // â”€â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -33,6 +37,24 @@ function parseGeminiJson<T>(raw: string): T | null {
   }
 }
 
+/**
+ * Fetches an image from a URL and converts it to base64.
+ */
+async function urlToBase64(
+  url: string,
+): Promise<{ base64: string; mimeType: string }> {
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const mimeType = response.headers.get("content-type") || "image/jpeg";
+  return {
+    base64: buffer.toString("base64"),
+    mimeType: mimeType as any,
+  };
+}
+
 // â”€â”€â”€ AI Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const aiService = {
@@ -46,14 +68,20 @@ export const aiService = {
     input: RerouteInput,
   ): Promise<RerouteSuggestionDTO> {
     // 1. Gather context from DB
-    const [hazardZone, currentRoute, allRoutes] = await Promise.all([
-      aiRepository.getHazardZoneById(input.hazardZoneId),
+    let hazardZone = await aiRepository.getHazardZoneById(input.hazardZoneId);
+
+    // Fallback to direct hazard report if no zone found
+    if (!hazardZone) {
+      hazardZone = await aiRepository.getHazardReportById(input.hazardZoneId);
+    }
+
+    const [currentRoute, allRoutes] = await Promise.all([
       aiRepository.getRouteById(input.currentRouteId),
       aiRepository.getAllRoutes(),
     ]);
 
     if (!hazardZone) {
-      throw new Error(`Hazard zone not found: ${input.hazardZoneId}`);
+      throw new Error(`Hazard context not found for ID: ${input.hazardZoneId}`);
     }
 
     const routeList = allRoutes
@@ -104,16 +132,10 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 }`;
 
     // 3. Call Gemini
-    const rawText = await geminiClient.generateText(prompt);
-
-    const parsed = parseGeminiJson<GeminiRerouteRaw>(rawText);
-
-    // 4. Fallback if JSON parse fails
-    const suggestion: GeminiRerouteRaw = parsed ?? {
-      suggestedRouteCode: null,
-      message: rawText || "Mag-ingat sa harap. Mabagal na magmaneho.",
-      alternativeSteps: ["Proceed with caution through the hazard zone."],
-    };
+    const suggestion = await geminiClient.generateJson<GeminiRerouteRaw>(
+      "You are CalamBiyahe, a road safety and transport assistant for Calamba City, Laguna, Philippines.",
+      prompt,
+    );
 
     return {
       hazardZoneId: input.hazardZoneId,
@@ -184,23 +206,17 @@ Consider typical Calamba traffic patterns, jeepney operations, and local knowled
 
 Respond ONLY with a valid JSON object â€” no markdown, no explanation outside JSON:
 {
-  "tips": ["<tip 1>", "<tip 2>", "<tip 3>"],
-  "recommendedRouteCode": "<CAL-XX or null if not applicable>",
-  "fareEstimate": "<e.g. PHP 13â€“15 or null if unknown>",
-  "bestTimeToTravel": "<e.g. Before 7:00 AM or After 8:00 PM or null>"
+  "tips": ["<tip 1 make it into tagalog where locals can understand>", "<tip 2 make it into tagalog where locals can understand>", "<tip 3 make it into tagalog where locals can understand>"],
+  "recommendedRouteCode": "<CAL-XX or null if not applicable make it into tagalog where locals can understand>",
+  "fareEstimate": "<e.g. PHP 13â€“15 or null if unknown make it into tagalog where locals can understand>",
+  "bestTimeToTravel": "<e.g. Before 7:00 AM or After 8:00 PM or null make it into tagalog where locals can understand>"
 }`;
 
     // 3. Call Gemini
-    const rawText = await geminiClient.generateText(prompt);
-
-    const parsed = parseGeminiJson<GeminiTravelTipsRaw>(rawText);
-
-    const tips: GeminiTravelTipsRaw = parsed ?? {
-      tips: [rawText || "Check with locals for the best jeepney to take."],
-      recommendedRouteCode: null,
-      fareEstimate: null,
-      bestTimeToTravel: null,
-    };
+    const tips = await geminiClient.generateJson<GeminiTravelTipsRaw>(
+      "You are CalamBiyahe, a local transport assistant for Calamba City, Laguna, Philippines.",
+      prompt,
+    );
 
     return {
       tips: tips.tips,
@@ -220,6 +236,40 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
   async analyzeHazardPhoto(
     input: HazardAnalysisInput,
   ): Promise<HazardAnalysisDTO> {
+    let base64 = input.imageBase64;
+    let mime = input.mimeType;
+
+    // 1. If reportId is provided instead of direct base64, fetch the image
+    if (input.reportId && !base64) {
+      const report = await hazardsRepository.getReportById(input.reportId);
+      if (!report || !report.image_url) {
+        throw new Error(
+          `Hazard report ${input.reportId} not found or has no image`,
+        );
+      }
+
+      // Construct full URL if relative
+      let imageUrl = report.image_url.startsWith("http")
+        ? report.image_url
+        : `${process.env.BASE_URL || "http://localhost:3000"}${report.image_url}`;
+
+      // OPTIMIZATION: If it's a Cloudinary URL, request a smaller, optimized version
+      if (imageUrl.includes("res.cloudinary.com")) {
+        imageUrl = imageUrl.replace(
+          "/upload/",
+          "/upload/w_1000,q_auto,f_auto/",
+        );
+      }
+
+      const fetched = await urlToBase64(imageUrl);
+      base64 = fetched.base64;
+      mime = fetched.mimeType as any;
+    }
+
+    if (!base64 || !mime) {
+      throw new Error("Missing image data or reportId for AI analysis");
+    }
+
     const prompt = `You are CalamBiyahe's road hazard detection system for Calamba City, Laguna, Philippines.
 
 Analyze this road photograph and identify any road hazards present.
@@ -236,17 +286,13 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
 {
   "severity": "<low | medium | high | critical>",
   "hazardType": "<pothole | lubak | flooding | construction | road damage | debris | other>",
-  "description": "<1â€“2 sentence objective description of what is visible>",
-  "recommendedAction": "<1 sentence instruction for drivers and commuters>",
+  "description": "<1â€“2 sentence objective description of what is visible make it into tagalog where locals can understand>",
+  "recommendedAction": "<1 sentence instruction for drivers and commuters and make it into tagalog where locals can understand>",
   "confidence": <0.0 to 1.0>
 }`;
 
     // 2. Call Gemini Vision
-    const rawText = await geminiClient.generateVisionText(
-      prompt,
-      input.imageBase64,
-      input.mimeType,
-    );
+    const rawText = await geminiClient.generateVisionText(prompt, base64, mime);
 
     const parsed = parseGeminiJson<GeminiHazardAnalysisRaw>(rawText);
 
@@ -268,5 +314,118 @@ Respond ONLY with a valid JSON object â€” no markdown, no explanation outsi
       confidence: Math.min(1, Math.max(0, analysis.confidence)),
       generatedAt: new Date().toISOString(),
     };
+  },
+
+  /**
+   * POST /api/v1/ai/route
+   *
+   * 1. Fetches OSRM baseline route.
+   * 2. Gathers active Calamba hazards.
+   * 3. Asks Gemini to refine the duration/ETA and give safe-driving advice.
+   */
+  async getAiRoute(input: RouteInput): Promise<RouteResponseDTO> {
+    try {
+      // 1. Fetch OSRM Baseline (with alternatives)
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${input.originLng},${input.originLat};${input.destLng},${input.destLat}?overview=full&geometries=geojson&alternatives=true`;
+
+      let osrmRes: any;
+      try {
+        const response = await fetch(osrmUrl);
+        osrmRes = await response.json();
+      } catch (err) {
+        throw new Error(
+          `OSRM fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+
+      if (osrmRes.code !== "Ok" || !osrmRes.routes?.[0]) {
+        throw new Error(`OSRM Error: ${osrmRes.message || "No route found"}`);
+      }
+
+      const routes = osrmRes.routes; // multiple routes if alternatives=true
+
+      // 2. Gather Hazards for Context
+      const confirmedHazards =
+        await hazardsRepository.getAllReports("confirmed");
+      const hazardList = confirmedHazards
+        .map(
+          (h) =>
+            `- ${h.type} at (${h.lat}, ${h.lng})${
+              h.description ? `: ${h.description}` : ""
+            }`,
+        )
+        .join("\n");
+
+      // 3. Build Gemini Prompt
+      const routeSummary = routes
+        .map(
+          (r: any, i: number) =>
+            `Route ${i + 1}: ${Math.round(r.distance)}m, ${Math.round(r.duration)}s baseline`,
+        )
+        .join("\n");
+
+      const prompt = `You are CalamBiyahe, an AI traffic and route assistant for Calamba City, Philippines.
+
+A driver requested a route:
+- Origin: (${input.originLat}, ${input.originLng})
+- Destination: (${input.destLat}, ${input.destLng})
+
+Baseline routes from OSRM:
+${routeSummary}
+
+Direct hazards reported in Calamba City right now:
+${hazardList || "No major hazards confirmed."}
+
+Task:
+Refine the estimated duration for EACH route based on these hazards and typical Calamba traffic patterns.
+Philippines traffic in urban areas like Calamba is often slow. Baseline OSRM times are usually too optimistic.
+Factor in:
+1. Hazards directly on or near the route.
+2. Typical traffic congestion (increase duration by 20-50% if in urban zones).
+3. If a route has hazards, increase duration significantly or advise against it.
+
+Respond ONLY with a valid JSON object:
+{
+  "refinedRoutes": [
+    {
+      "refinedDuration": <number_in_seconds>,
+      "message": "<1-2 sentence instruction/warning make it into tagalog where locals can understand>",
+      "hazardsEncountered": <number_of_hazards_near_route>
+    },
+    ... (one for each input route)
+  ]
+}`;
+
+      // 4. Call Gemini using structured JSON output
+      const parsed = await geminiClient.generateJson<GeminiRouteRaw>(
+        "You are CalamBiyahe, an AI traffic and route assistant for Calamba City, Philippines.",
+        prompt,
+      );
+
+      // Map Gemini refinements back to OSRM routes
+      const refinedRoutes = routes.map((r: any, i: number) => {
+        const ref = parsed?.refinedRoutes?.[i] || {
+          refinedDuration: r.duration * 1.3, // Default fallback: 30% increase for traffic
+          message: "Be careful of typical traffic in this area.",
+          hazardsEncountered: 0,
+        };
+
+        return {
+          distance: r.distance,
+          duration: ref.refinedDuration,
+          geometry: r.geometry,
+          message: ref.message,
+          hazardsEncountered: ref.hazardsEncountered,
+        };
+      });
+
+      return {
+        routes: refinedRoutes,
+        generatedAt: new Date().toISOString(),
+      };
+    } catch (err) {
+      console.error("AI Routing Service Error:", err);
+      throw err;
+    }
   },
 };

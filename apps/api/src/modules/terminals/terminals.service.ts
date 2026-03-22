@@ -26,18 +26,18 @@ export const terminalsService = {
     });
   },
 
-  async listTerminals() {
-    return await terminalsRepository.listTerminals();
+  async listTerminals(statusFilter: string = "confirmed") {
+    return await terminalsRepository.listTerminals(statusFilter);
   },
 
-  async getTerminalDetail(terminal_id: string) {
+  async getTerminalDetail(terminal_id: string, spotStatusFilter: string = "confirmed") {
     const terminal = await terminalsRepository.getTerminalById(terminal_id);
     if (!terminal) {
       throw createServiceError("Terminal not found", 404);
     }
 
     const spots =
-      await terminalsRepository.listWaitingSpotsByTerminal(terminal_id);
+      await terminalsRepository.listWaitingSpotsByTerminal(terminal_id, spotStatusFilter);
     return { ...terminal, waiting_spots: spots };
   },
 
@@ -106,5 +106,25 @@ export const terminalsService = {
       throw createServiceError("Waiting spot not found", 404);
     }
     return deleted;
+  },
+
+  async getAllWaitingSpots(statusFilter?: string) {
+    return await terminalsRepository.getAllWaitingSpots(statusFilter);
+  },
+
+  async updateTerminalStatus(terminal_id: string, status: string) {
+    const terminal = await terminalsRepository.updateTerminalStatus(terminal_id, status);
+    if (!terminal) {
+      throw createServiceError("Terminal not found", 404);
+    }
+    return terminal;
+  },
+
+  async updateWaitingSpotStatus(spot_id: string, status: string) {
+    const spot = await terminalsRepository.updateWaitingSpotStatus(spot_id, status);
+    if (!spot) {
+      throw createServiceError("Waiting spot not found", 404);
+    }
+    return spot;
   },
 };
